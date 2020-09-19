@@ -18,6 +18,8 @@ WIP for an inference visualization package.
 
 ### Extra Features 
 - [ ] Using a color mapping given some statistics
+- [ ] Allow to apply transformation before plotting
+
 ## Usage:
 
 Create a `TurViz` object:
