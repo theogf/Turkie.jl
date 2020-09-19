@@ -22,9 +22,22 @@ WIP for an inference visualization package.
 
 ## Usage:
 
-Create a `TurViz` object:
+Create a `TurkParams` object:
 ```julia
-TurViz() # default behavior : will plot the marginals of all variables
-v= TurViz(a=:trace, b=:m_kde)
-v = sample(model, sampler, n_iters, v)
+using Turing
+using Turkie
+@model function demo(x)
+    v ~ InverseGamma(3, 2)
+    s ~ InverseGamma(2, 3)
+    m ~ Normal(0, √s)
+    for i in eachindex(x)
+        x[i] ~ Normal(m, √s)
+    end
+end
+
+xs = randn(100) .+ 1;
+m = demo(xs);
+ps = TurkParams(m; nbins = 50) # default behavior : will plot the marginals and trace of all variables
+cb, scene = make_callback(ps) # Create a callback function to be given to sample
+chain = sample(m, NUTS(0.65), n_iters; callback = cb)
 ```

@@ -5,19 +5,30 @@ using AbstractPlotting
 using AbstractPlotting.MakieLayout
 using Colors, ColorSchemes
 using KernelDensity
+using OnlineStats
 using StatsBase
 using Turing
 
-export turviz
+export TurkParams
+export make_callback
 export sample_and_viz
 
 const std_colors = ColorSchemes.seaborn_colorblind
 
-function turviz(model)
-    variables = Turing.VarInfo(model).metadata
-    return Dict(Pair.(keys(variables), Ref([:trace, :histkde])))
+
+struct TurkParams
+    vars::Dict{Symbol, Any}
+    params::Dict{Symbol, Any}
 end
 
+function TurkParams(model; kwargs...) # Only needed for Turing models
+    variables = Turing.VarInfo(model).metadata
+    return TurkParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde]))); kwargs...)
+end
+
+function TurkParams(varsdict::Dict; kwargs...)
+    return TurkParams(varsdict, Dict(kwargs...))
+end
 
 function expand_extrema(xs)
     xmin, xmax = xs
@@ -26,26 +37,107 @@ function expand_extrema(xs)
     return (xmin, xmax)
 end
 
-function sample_and_viz(turviz::Dict, args...; kwargs...)
+function make_callback(params::TurkParams)
+# Create a scene and a layout
+    outer_padding = 5
+    scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
+    display(scene)
+
+    n_rows = length(keys(params.vars))
+    n_cols = maximum(length.(values(params.vars))) 
+    n_plots = n_rows * n_cols
+    nbins = get!(params.params, :nbins, 100)
+    iter = Node(0)
+    data = Dict{Symbol, Any}(:iter => Int64[])
+    axes_dict = Dict()
+    for (i, (variable, plots)) in enumerate(params.vars)
+        data[variable] = Real[]
+        axes_dict[(variable, :varname)] = layout[i, 1, Left()] = LText(scene, string(variable), textsize = 30)
+        axes_dict[(variable, :varname)].padding = (0, 50, 0, 0)
+        for (j, p) in enumerate(plots)
+            axes_dict[(variable, p)] = layout[i, j] = LAxis(scene, title = "$p")
+            if p == :trace
+                trace = lift(iter; init = [Point2f0(0, 0)]) do i
+                    Point2f0.(data[:iter], data[variable])
+                end
+                lines!(axes_dict[(variable, p)], trace, color = std_colors[i]; linewidth = 3.0)
+            elseif p == :hist
+                # Most of this can be removed once StatsMakie has been up to date
+                hist = lift(iter; init = StatsBase.normalize(fit(Histogram, [1.0, 2.0]), mode = :pdf)) do i
+                    N = length(data[variable])
+                    StatsBase.normalize(fit(Histogram, Float64.(data[variable]); nbins = nbins); mode = :pdf)
+                end
+                barplot!(axes_dict[(variable, p)], hist, color = std_colors[i]; linewidth = 3.0)
+            elseif p == :histkde
+                interpkde = lift(iter; init = InterpKDE(kde([1.0]))) do i
+                    InterpKDE(kde(data[variable]))
+                end
+                xs = lift(iter; init = range(0.0, 2.0, length = 200)) do i
+                    range(expand_extrema(extrema(data[variable]))..., length = 200)
+                end
+                kde_pdf = lift(xs) do xs
+                    pdf.(Ref(interpkde[]), xs)
+                end
+                hist = lift(iter; init = StatsBase.normalize(fit(Histogram, [1.0, 2.0]); mode = :pdf)) do i
+                    N = length(data[variable])
+                    StatsBase.normalize(fit(Histogram, Float64.(data[variable]); nbins = nbins); mode = :pdf)
+                end
+                barplot!(axes_dict[(variable, p)], hist, color = RGBA(std_colors[i], 0.8))
+                lines!(axes_dict[(variable, p)], xs, kde_pdf, color = std_colors[i], linewidth = 3.0)
+            elseif p == :kde
+                interpkde = lift(iter; init = InterpKDE(kde([1.0]))) do i
+                    InterpKDE(kde(data[variable]))
+                end
+                xs = lift(iter; init = range(0.0, 2.0, length = 200)) do i
+                    range(expand_extrema(extrema(data[variable]))..., length = 200)
+                end
+                kde_pdf = lift(xs) do xs
+                    pdf.(Ref(interpkde[]), xs)
+                end
+                lines!(axes_dict[(variable, p)], xs, kde_pdf, color = std_colors[i]; linewidth = 3.0)
+            end
+        end
+    end
+    lift(iter) do i
+        if i > 10 # To deal with autolimits a certain number of samples are needed
+            for (variable, plots) in params.vars
+                for p in plots
+                    autolimits!(axes_dict[(variable, p)])
+                    tightlimits!(axes_dict[(variable, p)])
+                end
+            end
+        end
+    end
+    MakieLayout.trim!(layout)
+    return function callback(rng, model, sampler, transition, iteration)
+        push!(data[:iter], iteration) 
+        for (vals, ks) in values(transition.θ)
+            for (k, val) in zip(ks, vals)
+                push!(data[Symbol(k)], val)
+            end
+        end
+        iter[] += 1
+    end, scene
+end
+
+function sample_and_viz(params::TurkParams, args...; kwargs...)
     # Create a scene and a layout
     outer_padding = 30
     scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
     display(scene)
 
-    n_rows = length(keys(turviz))
-    n_cols = maximum(length.(values(turviz)))
+    n_rows = length(keys(params.vars))
+    n_cols = maximum(length.(values(params.vars))) + 1
     n_plots = n_rows * n_cols
+    nbins = get!(params.params, :nbins, 100)
     iter = Node(0)
     data = Dict{Symbol, Any}(:iter => Int64[])
-    var_to_plot = Dict()
-    p_to_plot = Dict()
     axes = Dict()
-    for (i, (variable, plots)) in enumerate(turviz)
-        var_to_plot[variable] = i
+    for (i, (variable, plots)) in enumerate(params.vars)
         data[variable] = Real[]
+        axes[(variable, )] = layout[i, j] = LAxis(scene, title = "")
         for (j, p) in enumerate(plots)
-            p_to_plot[p] = j
-            axes[(variable, p)] = layout[i, j] = LAxis(scene, title = "$variable : $p")
+            axes[(variable, p)] = layout[i+1, j] = LAxis(scene, title = "$variable : $p")
             if p == :trace
                 trace = lift(iter; init = [Point2f0(0, 0)]) do i
                     Point2f0.(data[:iter], data[variable])
@@ -55,9 +147,8 @@ function sample_and_viz(turviz::Dict, args...; kwargs...)
                 # Most of this can be removed once StatsMakie has been up to date
                 hist = lift(iter; init = StatsBase.normalize(fit(Histogram, [1.0, 2.0]), mode = :pdf)) do i
                     N = length(data[variable])
-                    StatsBase.normalize(fit(Histogram, Float64.(data[variable]); nbins = 100); mode = :pdf)
+                    StatsBase.normalize(fit(Histogram, Float64.(data[variable]); nbins = nbins); mode = :pdf)
                 end
-                @show hist[]
                 barplot!(axes[(variable, p)], hist, color = std_colors[i]; linewidth = 3.0)
             elseif p == :histkde
                 interpkde = lift(iter; init = InterpKDE(kde([1.0]))) do i
@@ -71,7 +162,7 @@ function sample_and_viz(turviz::Dict, args...; kwargs...)
                 end
                 hist = lift(iter; init = StatsBase.normalize(fit(Histogram, [1.0, 2.0]); mode = :pdf)) do i
                     N = length(data[variable])
-                    StatsBase.normalize(fit(Histogram, Float64.(data[variable]); nbins = 100); mode = :pdf)
+                    StatsBase.normalize(fit(Histogram, Float64.(data[variable]); nbins = nbins); mode = :pdf)
                 end
                 barplot!(axes[(variable, p)], hist, color = RGBA(std_colors[i], 0.8))
                 lines!(axes[(variable, p)], xs, kde_pdf, color = std_colors[i], linewidth = 3.0)
@@ -91,9 +182,10 @@ function sample_and_viz(turviz::Dict, args...; kwargs...)
     end
     lift(iter) do i
         if i > 10 # To deal with autolimits a certain number of samples are needed
-            for (variable, plots) in turviz
+            for (variable, plots) in params.vars
                 for p in plots
                     autolimits!(axes[(variable, p)])
+                    tightlimits!(axes[(variable, p)])
                 end
             end
         end
