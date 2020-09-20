@@ -12,6 +12,10 @@ using Turing
 export TurkieParams
 export TurkieCallback
 
+export addIO!
+export record
+
+
 const std_colors = ColorSchemes.seaborn_colorblind
 
 struct TurkieParams
@@ -163,6 +167,10 @@ function TurkieCallback(params::TurkieParams)
     TurkieCallback(scene, data, axes_dict, params, iter)
 end
 
+function addIO!(cb::TurkieCallback, io)
+    cb.params.params[:io] = io
+end
+
 function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
     fit!(cb.data[:iter], iteration)
     for (vals, ks) in values(transition.θ)
@@ -171,6 +179,10 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
         end
     end
     cb.iter[] += 1
+    if haskey(cb.params.params, :io) 
+        #error("You need to pass the IO object via `addIO!(cb, io)`")
+        recordframe!(cb.params.params[:io])
+    end
 end
 
 end

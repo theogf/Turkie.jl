@@ -11,7 +11,7 @@ WIP for an inference visualization package.
 ### Additional features :
 - [x] Selecting which variables are plotted
 - [x] Selecting what plots to show
-- [ ] Giving a recording option
+- [x] Giving a recording option
 - [ ] Additional fine tuning features like
     - [ ] Thinning
     - [x] Creating a buffer to limit the viewing
@@ -39,4 +39,13 @@ m = demo(xs);
 ps = TurkieParams(m; nbins = 50, window = 200) # default behavior : will plot the marginals and trace of all variables
 cb = TurkieCallback(ps) # Create a callback function to be given to sample
 chain = sample(m, NUTS(0.65), n_iters; callback = cb)
+```
+
+If you want to record the video do
+
+```julia
+record(cb.scene, joinpath(@__DIR__, "video.webm")) do io
+    addIO!(cb, io)
+    sample(m,  NUTS(0.65), 300; callback = cb)
+end
 ```
