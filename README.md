@@ -38,7 +38,7 @@ xs = randn(100) .+ 1;
 m = demo(xs);
 ps = TurkieParams(m; nbins = 50, window = 200) # default behavior : will plot the marginals and trace of all variables
 cb = TurkieCallback(ps) # Create a callback function to be given to sample
-chain = sample(m, NUTS(0.65), n_iters; callback = cb)
+chain = sample(m, NUTS(0.65), 300; callback = cb)
 ```
 
 If you want to show only some variables you can give a `Dict` to `TurkieParams` :
