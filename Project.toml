@@ -16,6 +16,16 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
 AbstractPlotting = "0.12"
+Colors = "0.12"
+ColorSchemes = "3.10"
+DataStructures = "0.18"
+KernelDensity = "0.6"
+Makie = "0.11"
+OnlineStats = "1.5"
+StatsBase = "0.33"
+Turing = "0.14"
+
+
 julia = "1"
 
 [extras]
