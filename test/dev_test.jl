@@ -14,6 +14,7 @@ xs = randn(100) .+ 1;
 m = demo(xs);
 
 keys(Turing.VarInfo(m).metadata)
-viz_paramz = TurkParams(m; nbins = 20)
-cb, scene = make_callback(viz_paramz);
-chain = sample(m,  NUTS(0.65), 500; callback = cb);
+ps = TurkieParams(m; nbins = 20)
+cb = TurkieCallback(ps);
+# chain = sample(m,  HMC(0.5, 10), 40; callback = cb);
+chain = sample(m,  NUTS(0.65), 40; callback = cb);
