@@ -3,26 +3,25 @@
 WIP for an inference visualization package.
 
 ### To plot during sampling :
-- [ ] Trace of the chains
-- [ ] Statistics (mean and var)
-- [ ] Marginals (KDE/Histograms)
-- [ ] Autocorrelation plots
+- [x] Trace of the chains
+- [x] Statistics (mean and var)
+- [x] Marginals (KDE/Histograms)
+- [x] Autocorrelation plots
 
 ### Additional features :
-- [ ] Selecting which variables are plotted
-- [ ] Selecting what plots to show
+- [x] Selecting which variables are plotted
+- [x] Selecting what plots to show
 - [ ] Giving a recording option
 - [ ] Additional fine tuning features like
     - [ ] Thinning
-    - [ ] Creating a buffer to limit the viewing
+    - [x] Creating a buffer to limit the viewing
 
 ### Extra Features 
 - [ ] Using a color mapping given some statistics
 - [ ] Allow to apply transformation before plotting
 
 ## Usage:
-
-Create a `TurkParams` object:
+Small example:
 ```julia
 using Turing
 using Turkie
@@ -37,7 +36,7 @@ end
 
 xs = randn(100) .+ 1;
 m = demo(xs);
-ps = TurkParams(m; nbins = 50) # default behavior : will plot the marginals and trace of all variables
-cb, scene = make_callback(ps) # Create a callback function to be given to sample
+ps = TurkieParams(m; nbins = 50, window = 200) # default behavior : will plot the marginals and trace of all variables
+cb = TurkieCallback(ps) # Create a callback function to be given to sample
 chain = sample(m, NUTS(0.65), n_iters; callback = cb)
 ```
