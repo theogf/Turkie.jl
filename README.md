@@ -41,6 +41,14 @@ cb = TurkieCallback(ps) # Create a callback function to be given to sample
 chain = sample(m, NUTS(0.65), n_iters; callback = cb)
 ```
 
+If you want to show only some variables you can give a `Dict` to `TurkieParams` :
+
+```julia
+ps = TurkieParams(Dict(:v => [:trace, :mean],
+                        :s => [:autocov, :var]))
+
+```
+
 If you want to record the video do
 
 ```julia

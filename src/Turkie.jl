@@ -55,7 +55,7 @@ function TurkieCallback(params::TurkieParams)
     display(scene)
 
     nbins = get!(params.params, :nbins, 100)
-    window = min(get!(params.params, :window, 1000), 1000)
+    window = get!(params.params, :window, 1000)
     b = get!(params.params, :b, 20)
 
     n_rows = length(keys(params.vars))
@@ -175,7 +175,9 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
     fit!(cb.data[:iter], iteration)
     for (vals, ks) in values(transition.θ)
         for (k, val) in zip(ks, vals)
-            fit!(cb.data[Symbol(k)], Float32(val))
+            if haskey(cb.data, Symbol(k))
+                fit!(cb.data[Symbol(k)], Float32(val))
+            end
         end
     end
     cb.iter[] += 1
