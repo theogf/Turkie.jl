@@ -1,19 +1,18 @@
 module Turkie
 
-using Makie
-using AbstractPlotting
-using AbstractPlotting.MakieLayout
-using Colors, ColorSchemes
-using KernelDensity
-using OnlineStats
-using StatsBase
-using Turing
+using AbstractPlotting: Scene, Point2f0
+using AbstractPlotting: barplot!, lines!, scatter! # Plotting tools
+using AbstractPlotting: Observable, Node, lift # Observable tools
+using AbstractPlotting: recordframe! # Recording tools
+using AbstractPlotting.MakieLayout # Layouting tool
+using Colors, ColorSchemes # Colors tools
+using KernelDensity # To be able to give a KDE
+using OnlineStats # Estimators
+using DynamicPPL: VarInfo, Model
 
-export TurkieParams
-export TurkieCallback
+export TurkieParams, TurkieCallback
 
-export addIO!
-export record
+export addIO!, record
 
 include("online_stats_plots.jl")
 
@@ -24,8 +23,8 @@ struct TurkieParams
     params::Dict{Symbol, Any}
 end
 
-function TurkieParams(model; kwargs...) # Only needed for Turing models
-    variables = Turing.VarInfo(model).metadata
+function TurkieParams(model::Model; kwargs...) # Only needed for DynamicPPL models
+    variables = VarInfo(model).metadata
     return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde, Mean(), Variance(), AutoCov(20)]))); kwargs...)
 end
 
@@ -42,7 +41,7 @@ function expand_extrema(xs)
 end
 
 struct TurkieCallback
-    scene::AbstractPlotting.Scene
+    scene::Scene
     data::Dict{Symbol, MovingWindow}
     axes_dict::Dict
     params::TurkieParams
@@ -55,9 +54,7 @@ function TurkieCallback(params::TurkieParams)
     scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
     display(scene)
 
-    nbins = get!(params.params, :nbins, 100)
     window = get!(params.params, :window, 1000)
-    b = get!(params.params, :b, 20)
 
     n_rows = length(keys(params.vars))
     n_cols = maximum(length.(values(params.vars))) 

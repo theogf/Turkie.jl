@@ -1,6 +1,6 @@
 using Turing
 using Turkie
-
+using GLMakie
 @model function demo(x)
     v ~ InverseGamma(3, 2)
     s ~ InverseGamma(2, 3)
