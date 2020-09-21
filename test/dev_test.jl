@@ -15,9 +15,9 @@ m = demo(xs);
 
 keys(Turing.VarInfo(m).metadata)
 ps = TurkieParams(m; nbins = 20)
-ps = TurkieParams(Dict(:v => [:trace, :mean],
-                        :s => [:autocov, :var]);
-                        window = 50)
+# ps = TurkieParams(Dict(:v => [:trace, :mean],
+                        # :s => [:autocov, :var]);
+                        # window = 50)
 cb = TurkieCallback(ps);
 # chain = sample(m,  HMC(0.5, 10), 40; callback = cb);
 chain = sample(m,  NUTS(0.65), 300; callback = cb);

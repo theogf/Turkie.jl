@@ -15,6 +15,7 @@ export TurkieCallback
 export addIO!
 export record
 
+include("online_stats_plots.jl")
 
 const std_colors = ColorSchemes.seaborn_colorblind
 
@@ -25,7 +26,7 @@ end
 
 function TurkieParams(model; kwargs...) # Only needed for Turing models
     variables = Turing.VarInfo(model).metadata
-    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde, :mean, :var, :autocov]))); kwargs...)
+    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde, Mean(), Variance(), AutoCov(20)]))); kwargs...)
 end
 
 function TurkieParams(varsdict::Dict; kwargs...)
@@ -41,8 +42,8 @@ function expand_extrema(xs)
 end
 
 struct TurkieCallback
-    scene
-    data::Dict
+    scene::AbstractPlotting.Scene
+    data::Dict{Symbol, MovingWindow}
     axes_dict::Dict
     params::TurkieParams
     iter::Observable{Int64}
@@ -70,87 +71,8 @@ function TurkieCallback(params::TurkieParams)
         axes_dict[(variable, :varname)].padding = (0, 50, 0, 0)
         for (j, p) in enumerate(plots)
             axes_dict[(variable, p)] = layout[i, j] = LAxis(scene, title = "$p")
-            if p == :trace
-                trace = lift(iter; init = [Point2f0(0, 0f0)]) do i
-                    Point2f0.(value(data[:iter]), value(data[variable]))
-                end
-                lines!(axes_dict[(variable, p)], trace, color = std_colors[i]; linewidth = 3.0)
-            elseif p == :hist
-                # Most of this can be removed once StatsMakie has been up to date
-                hist = lift(iter; init = KHist(nbins, Float32)) do i
-                    fit!(hist[], last(value(data[variable])))
-                end
-                hist_vals = lift(hist; init = Point2f0.(range(0, 1, length = nbins), zeros(Float32, nbins))) do h
-                    N = sum(last, h.bins)
-                    return Point2f0.(first.(h.bins), last.(h.bins) ./ N)
-                end
-                
-                barplot!(axes_dict[(variable, p)], hist_vals, color = std_colors[i])
-                # barplot!(axes_dict[(variable, p)], hist, color = std_colors[i]; linewidth = 3.0)
-            elseif p == :histkde
-                interpkde = lift(iter; init = InterpKDE(kde([1f0]))) do i
-                    InterpKDE(kde(value(data[variable])))
-                end
-                xs = lift(iter; init = range(0.0, 2.0, length = 200)) do i
-                    range(expand_extrema(extrema(value(data[variable])))..., length = 200)
-                end
-                kde_pdf = lift(xs) do xs
-                    pdf.(Ref(interpkde[]), xs)
-                end
-                hist = lift(iter; init = KHist(nbins, Float32)) do i
-                    fit!(hist[], last(value(data[variable])))
-                end
-                hist_vals = lift(hist; init = Point2f0.(range(0, 1, length = nbins), zeros(Float32, nbins))) do h
-                    edges, weights =OnlineStats.xy(h)
-                    weights = nobs(h) > 1 ? weights / OnlineStats.area(h) : weights
-                    return Point2f0.(edges, weights)
-                end
-                barplot!(axes_dict[(variable, p)], hist_vals, color = RGBA(std_colors[i], 0.8))
-                lines!(axes_dict[(variable, p)], xs, kde_pdf, color = std_colors[i], linewidth = 3.0)
-            elseif p == :kde
-                interpkde = lift(iter; init = InterpKDE(kde([1.0]))) do i
-                    InterpKDE(kde(data[variable]))
-                end
-                xs = lift(iter; init = range(0.0, 2.0, length = 200)) do i
-                    range(expand_extrema(extrema(data[variable]))..., length = 200)
-                end
-                kde_pdf = lift(xs) do xs
-                    pdf.(Ref(interpkde[]), xs)
-                end
-                lines!(axes_dict[(variable, p)], xs, kde_pdf, color = std_colors[i]; linewidth = 3.0)
-            
-            elseif p == :mean
-                obs_mean = lift(iter; init = Mean(Float32)) do i
-                    fit!(obs_mean[], last(value(data[variable])))
-                end
-                vals_mean = lift(obs_mean; init = MovingWindow(window, Float32)) do m
-                    fit!(vals_mean[], value(m))
-                end
-                points_mean = lift(vals_mean; init = [Point2f0(0, 0)]) do v
-                    Point2f0.(value(data[:iter]), value(v))
-                end
-                lines!(axes_dict[(variable, p)], points_mean, color = std_colors[i], linewidth = 3.0)
-            elseif p == :var
-                obs_var = lift(iter; init = Variance(Float32)) do i
-                    fit!(obs_var[], last(value(data[variable])))
-                end
-                vals_var = lift(obs_var; init = MovingWindow(window, Float32)) do v
-                    fit!(vals_var[], Float32(value(v)))
-                end
-                points_var = lift(vals_var; init = [Point2f0(0, 0)]) do v
-                    Point2f0.(value(data[:iter]), value(v))
-                end
-                lines!(axes_dict[(variable, p)], points_var, color = std_colors[i], linewidth = 3.0)
-            elseif p == :autocov
-                obs_autocov = lift(iter; init = AutoCov(b, Float32)) do i
-                    fit!(obs_autocov[], last(value(data[variable])))
-                end
-                vals_autocov = lift(obs_autocov; init = zeros(Float32, b + 1)) do v
-                    value(v)
-                end
-                lines!(axes_dict[(variable, p)], 0:b, vals_autocov, color = std_colors[i], linewidth = 3.0)
-                ylims!(axes_dict[(variable, p)] , (-0.2, 1.2))
-            end
+            onlineplot!(axes_dict[(variable, p)], p, iter, data[variable], data[:iter], i, j)
+            tight_ticklabel_spacing!(axes_dict[(variable, p)])
         end
     end
     lift(iter) do i
@@ -158,7 +80,6 @@ function TurkieCallback(params::TurkieParams)
             for (variable, plots) in params.vars
                 for p in plots
                     autolimits!(axes_dict[(variable, p)])
-                    tightlimits!(axes_dict[(variable, p)])
                 end
             end
         end
