@@ -15,14 +15,14 @@ m = demo(xs);
 
 keys(Turing.VarInfo(m).metadata)
 ps = TurkieParams(m; nbins = 20)
-# ps = TurkieParams(Dict(:v => [:trace, :mean],
-                        # :s => [:autocov, :var]);
+ps = TurkieParams(Dict(:v => [:trace, :mean, :histkde], :s => [:var, :autocov]));
+# ps = TurkieParams(Dict(:v => [:mean]));
                         # window = 50)
 cb = TurkieCallback(ps);
 # chain = sample(m,  HMC(0.5, 10), 40; callback = cb);
-chain = sample(m,  NUTS(0.65), 300; callback = cb);
+chain = sample(m,  NUTS(0.65), 500; callback = cb);
 
-record(cb.scene, joinpath(@__DIR__, "video.webm")) do io
-    addIO!(cb, io)
-    sample(m,  NUTS(0.65), 300; callback = cb)
-end
+# record(cb.scene, joinpath(@__DIR__, "video.webm")) do io
+    # addIO!(cb, io)
+    # sample(m,  NUTS(0.65), 300; callback = cb)
+# end

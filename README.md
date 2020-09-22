@@ -1,5 +1,3 @@
-
-# WARNING : Currently things are not working due to a Julia bug see MWE : https://gist.github.com/theogf/9069bacc7038ad6fae37d622acd2a7ec
 # Turing + Makie -> Turkie!
 
 WIP for an inference visualization package.
@@ -51,9 +49,16 @@ ps = TurkieParams(Dict(:v => [:trace, :mean],
 
 ```
 
+You can also directly pass `OnlineStats` object : 
+```julia
+using OnlineStats
+ps = TurkieParams(Dict(:v => [Mean(), AutoCov(20)]))
+```
+
 If you want to record the video do
 
 ```julia
+using Makie
 record(cb.scene, joinpath(@__DIR__, "video.webm")) do io
     addIO!(cb, io)
     sample(m,  NUTS(0.65), 300; callback = cb)

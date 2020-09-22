@@ -2,7 +2,7 @@ module Turkie
 
 using AbstractPlotting: Scene, Point2f0
 using AbstractPlotting: barplot!, lines!, scatter! # Plotting tools
-using AbstractPlotting: Observable, Node, lift # Observable tools
+using AbstractPlotting: Observable, Node, lift, on # Observable tools
 using AbstractPlotting: recordframe! # Recording tools
 using AbstractPlotting.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools
@@ -25,19 +25,13 @@ end
 
 function TurkieParams(model::Model; kwargs...) # Only needed for DynamicPPL models
     variables = VarInfo(model).metadata
-    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde, Mean(), Variance(), AutoCov(20)]))); kwargs...)
+    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace])));
+    # :histkde, Mean(), Variance(), AutoCov(20)])))
+    kwargs...)
 end
 
 function TurkieParams(varsdict::Dict; kwargs...)
     return TurkieParams(varsdict, Dict(kwargs...))
-end
-
-function expand_extrema(xs)
-    xmin, xmax = xs
-    diffx = xmax - xmin
-    xmin = xmin - 0.1 * abs(diffx)
-    xmax = xmax + 0.1 * abs(diffx)
-    return (xmin, xmax)
 end
 
 struct TurkieCallback
@@ -61,12 +55,14 @@ function TurkieCallback(params::TurkieParams)
     n_plots = n_rows * n_cols
     iter = Node(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int64))
+    obs = Dict{Symbol, Any}()
     axes_dict = Dict()
     for (i, (variable, plots)) in enumerate(params.vars)
         data[variable] = MovingWindow(window, Float32)
         axes_dict[(variable, :varname)] = layout[i, 1, Left()] = LText(scene, string(variable), textsize = 30)
         axes_dict[(variable, :varname)].padding = (0, 50, 0, 0)
         for (j, p) in enumerate(plots)
+            obs[variable] = Observable[]
             axes_dict[(variable, p)] = layout[i, j] = LAxis(scene, title = "$p")
             onlineplot!(axes_dict[(variable, p)], p, iter, data[variable], data[:iter], i, j)
             tight_ticklabel_spacing!(axes_dict[(variable, p)])
