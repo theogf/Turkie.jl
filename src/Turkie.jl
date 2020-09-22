@@ -25,9 +25,8 @@ end
 
 function TurkieParams(model::Model; kwargs...) # Only needed for DynamicPPL models
     variables = VarInfo(model).metadata
-    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace])));
-    # :histkde, Mean(), Variance(), AutoCov(20)])))
-    kwargs...)
+    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde, Mean(), Variance(), AutoCov(20)]))),
+    Dict(kwargs...))
 end
 
 function TurkieParams(varsdict::Dict; kwargs...)
@@ -41,6 +40,9 @@ struct TurkieCallback
     params::TurkieParams
     iter::Observable{Int64}
 end
+
+name(s::Symbol) = string(s)
+name(s::OnlineStat) = nameof(typeof(s))
 
 function TurkieCallback(params::TurkieParams)
 # Create a scene and a layout
@@ -63,7 +65,7 @@ function TurkieCallback(params::TurkieParams)
         axes_dict[(variable, :varname)].padding = (0, 50, 0, 0)
         for (j, p) in enumerate(plots)
             obs[variable] = Observable[]
-            axes_dict[(variable, p)] = layout[i, j] = LAxis(scene, title = "$p")
+            axes_dict[(variable, p)] = layout[i, j] = LAxis(scene, title = "$(name(p))")
             onlineplot!(axes_dict[(variable, p)], p, iter, data[variable], data[:iter], i, j)
             tight_ticklabel_spacing!(axes_dict[(variable, p)])
         end
