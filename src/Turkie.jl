@@ -18,48 +18,48 @@ include("online_stats_plots.jl")
 
 const std_colors = ColorSchemes.seaborn_colorblind
 
-struct TurkieParams
-    vars::Dict{Symbol, Any}
-    params::Dict{Symbol, Any}
-end
-
-function TurkieParams(model::Model; kwargs...) # Only needed for DynamicPPL models
-    variables = VarInfo(model).metadata
-    return TurkieParams(Dict(Pair.(keys(variables), Ref([:trace, :histkde, Mean(), Variance(), AutoCov(20)]))),
-    Dict(kwargs...))
-end
-
-function TurkieParams(varsdict::Dict; kwargs...)
-    return TurkieParams(varsdict, Dict(kwargs...))
-end
+name(s::Symbol) = string(s)
+name(s::OnlineStat) = nameof(typeof(s))
 
 struct TurkieCallback
     scene::Scene
     data::Dict{Symbol, MovingWindow}
     axes_dict::Dict
-    params::TurkieParams
+    vars::Dict{Symbol, Any}
+    params::Dict{Symbol, Any}
     iter::Observable{Int64}
 end
 
-name(s::Symbol) = string(s)
-name(s::OnlineStat) = nameof(typeof(s))
+function TurkieCallback(model::Model; kwargs...) # Only needed for DynamicPPL models
+    TurkieCallback(model, [:trace, :histkde, Mean(), Variance(), AutoCov(20)]; kwargs...)
+end
 
-function TurkieCallback(params::TurkieParams)
+function TurkieCallback(model::Model, plots::AbstractVector; kwargs...)
+    variables = VarInfo(model).metadata
+    return TurkieCallback(Dict(Pair.(keys(variables), Ref(plots))),
+    Dict(kwargs...))
+end
+
+function TurkieCallBack(varsdict::Dict; kwargs...)
+    return TurkieCallback(varsdict, Dict(kwargs...))
+end
+
+function TurkieCallback(vars::Dict, params::Dict)
 # Create a scene and a layout
     outer_padding = 5
     scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
     display(scene)
 
-    window = get!(params.params, :window, 1000)
+    window = get!(params, :window, 1000)
 
-    n_rows = length(keys(params.vars))
-    n_cols = maximum(length.(values(params.vars))) 
+    n_rows = length(keys(vars))
+    n_cols = maximum(length.(values(vars))) 
     n_plots = n_rows * n_cols
     iter = Node(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int64))
     obs = Dict{Symbol, Any}()
     axes_dict = Dict()
-    for (i, (variable, plots)) in enumerate(params.vars)
+    for (i, (variable, plots)) in enumerate(vars)
         data[variable] = MovingWindow(window, Float32)
         axes_dict[(variable, :varname)] = layout[i, 1, Left()] = LText(scene, string(variable), textsize = 30)
         axes_dict[(variable, :varname)].padding = (0, 50, 0, 0)
@@ -70,9 +70,9 @@ function TurkieCallback(params::TurkieParams)
             tight_ticklabel_spacing!(axes_dict[(variable, p)])
         end
     end
-    lift(iter) do i
+    on(iter) do i
         if i > 10 # To deal with autolimits a certain number of samples are needed
-            for (variable, plots) in params.vars
+            for (variable, plots) in vars
                 for p in plots
                     autolimits!(axes_dict[(variable, p)])
                 end
@@ -80,11 +80,11 @@ function TurkieCallback(params::TurkieParams)
         end
     end
     MakieLayout.trim!(layout)
-    TurkieCallback(scene, data, axes_dict, params, iter)
+    TurkieCallback(scene, data, axes_dict, vars, params, iter)
 end
 
 function addIO!(cb::TurkieCallback, io)
-    cb.params.params[:io] = io
+    cb.params[:io] = io
 end
 
 function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
@@ -97,9 +97,8 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
         end
     end
     cb.iter[] += 1
-    if haskey(cb.params.params, :io) 
-        #error("You need to pass the IO object via `addIO!(cb, io)`")
-        recordframe!(cb.params.params[:io])
+    if haskey(cb.params, :io) 
+        recordframe!(cb.params[:io])
     end
 end
 

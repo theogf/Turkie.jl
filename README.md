@@ -26,7 +26,7 @@ Small example:
 using Turing
 using Turkie
 @model function demo(x)
-    v ~ InverseGamma(3, 2)
+    v ~ InverseGamma(3, v)
     s ~ InverseGamma(2, 3)
     m ~ Normal(0, √s)
     for i in eachindex(x)
@@ -36,7 +36,6 @@ end
 
 xs = randn(100) .+ 1;
 m = demo(xs);
-ps = TurkieParams(m; nbins = 50, window = 200) # default behavior : will plot the marginals and trace of all variables
 cb = TurkieCallback(ps) # Create a callback function to be given to sample
 chain = sample(m, NUTS(0.65), 300; callback = cb)
 ```
@@ -44,7 +43,7 @@ chain = sample(m, NUTS(0.65), 300; callback = cb)
 If you want to show only some variables you can give a `Dict` to `TurkieParams` :
 
 ```julia
-ps = TurkieParams(Dict(:v => [:trace, :mean],
+cb = TurkieCallback(Dict(:v => [:trace, :mean],
                         :s => [:autocov, :var]))
 
 ```
@@ -52,7 +51,7 @@ ps = TurkieParams(Dict(:v => [:trace, :mean],
 You can also directly pass `OnlineStats` object : 
 ```julia
 using OnlineStats
-ps = TurkieParams(Dict(:v => [Mean(), AutoCov(20)]))
+cb = TurkieCallback(Dict(:v => [Mean(), AutoCov(20)]))
 ```
 
 If you want to record the video do
