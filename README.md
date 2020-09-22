@@ -1,3 +1,5 @@
+
+# WARNING : Currently things are not working due to a Julia bug see MWE : https://gist.github.com/theogf/9069bacc7038ad6fae37d622acd2a7ec
 # Turing + Makie -> Turkie!
 
 WIP for an inference visualization package.
