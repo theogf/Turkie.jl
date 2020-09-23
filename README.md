@@ -2,6 +2,12 @@
 
 WIP for an inference visualization package.
 
+This package is not registered at the moment and will probably be merged with [TuringCallback](https://github.com/torfjelde/TuringCallbacks.jl) at some point.
+To try it nonetheless run :
+```
+] add https://github.com/theogf/Turkie.jl
+```
+
 ### To plot during sampling :
 - [x] Trace of the chains
 - [x] Statistics (mean and var)
