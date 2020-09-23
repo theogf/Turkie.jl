@@ -31,7 +31,8 @@ Small example:
 ```julia
 using Turing
 using Turkie
-@model function demo(x)
+using Makie # You could also use CairoMakie or another backend
+@model function demo(x) # Some random Turing model
     v ~ InverseGamma(3, v)
     s ~ InverseGamma(2, 3)
     m ~ Normal(0, √s)
@@ -46,7 +47,7 @@ cb = TurkieCallback(ps) # Create a callback function to be given to sample
 chain = sample(m, NUTS(0.65), 300; callback = cb)
 ```
 
-If you want to show only some variables you can give a `Dict` to `TurkieParams` :
+If you want to show only some variables you can give a `Dict` to `TurkieCallback` :
 
 ```julia
 cb = TurkieCallback(Dict(:v => [:trace, :mean],
