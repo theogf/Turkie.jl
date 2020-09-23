@@ -1,5 +1,6 @@
 using Turing
 using Turkie
+using OnlineStats
 using GLMakie
 @model function demo(x)
     v ~ InverseGamma(3, 2)

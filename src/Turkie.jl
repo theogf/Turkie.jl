@@ -21,20 +21,26 @@ const std_colors = ColorSchemes.seaborn_colorblind
 name(s::Symbol) = string(s)
 name(s::OnlineStat) = nameof(typeof(s))
 
+"""
+    TurkieCallback(model::DynamicPPL.Model, plots::Series/AbstractVector = )
+
+    ## Keyword arguments
+    - `showtrace=true` : Show the trace of the variable
+    - `window=0` : Use a window for plotting the trace, 0 will not use a window
+
+"""
+TurkieCallBack
+
 struct TurkieCallback
     scene::Scene
     data::Dict{Symbol, MovingWindow}
-    axes_dict::Dict
+    axis_dict::Dict
     vars::Dict{Symbol, Any}
-    params::Dict{Symbol, Any}
+    params::Dict{Any, Any}
     iter::Observable{Int64}
 end
 
-function TurkieCallback(model::Model; kwargs...) # Only needed for DynamicPPL models
-    TurkieCallback(model, [:trace, :histkde, Mean(), Variance(), AutoCov(20)]; kwargs...)
-end
-
-function TurkieCallback(model::Model, plots::AbstractVector; kwargs...)
+function TurkieCallback(model::Model, plots::Union{Series, AbstractVector} = [:histkde, Mean(), Variance(), AutoCov(20)]; kwargs...)
     variables = VarInfo(model).metadata
     return TurkieCallback(Dict(Pair.(keys(variables), Ref(plots))),
     Dict(kwargs...))
@@ -58,29 +64,24 @@ function TurkieCallback(vars::Dict, params::Dict)
     iter = Node(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int64))
     obs = Dict{Symbol, Any}()
-    axes_dict = Dict()
+    axis_dict = Dict()
     for (i, (variable, plots)) in enumerate(vars)
         data[variable] = MovingWindow(window, Float32)
-        axes_dict[(variable, :varname)] = layout[i, 1, Left()] = LText(scene, string(variable), textsize = 30)
-        axes_dict[(variable, :varname)].padding = (0, 50, 0, 0)
-        for (j, p) in enumerate(plots)
-            obs[variable] = Observable[]
-            axes_dict[(variable, p)] = layout[i, j] = LAxis(scene, title = "$(name(p))")
-            onlineplot!(axes_dict[(variable, p)], p, iter, data[variable], data[:iter], i, j)
-            tight_ticklabel_spacing!(axes_dict[(variable, p)])
-        end
+        axis_dict[(variable, :varname)] = layout[i, 1, Left()] = LText(scene, string(variable), textsize = 30)
+        axis_dict[(variable, :varname)].padding = (0, 50, 0, 0)
+        onlineplot!(scene, layout, axis_dict, plots, iter, data, variable, i)
     end
     on(iter) do i
         if i > 10 # To deal with autolimits a certain number of samples are needed
             for (variable, plots) in vars
                 for p in plots
-                    autolimits!(axes_dict[(variable, p)])
+                    autolimits!(axis_dict[(variable, p)])
                 end
             end
         end
     end
     MakieLayout.trim!(layout)
-    TurkieCallback(scene, data, axes_dict, vars, params, iter)
+    TurkieCallback(scene, data, axis_dict, vars, params, iter)
 end
 
 function addIO!(cb::TurkieCallback, io)
