@@ -33,7 +33,7 @@ using Turing
 using Turkie
 using Makie # You could also use CairoMakie or another backend
 @model function demo(x) # Some random Turing model
-    v ~ InverseGamma(3, v)
+    v ~ InverseGamma(3, 2)
     s ~ InverseGamma(2, 3)
     m ~ Normal(0, √s)
     for i in eachindex(x)
@@ -43,7 +43,7 @@ end
 
 xs = randn(100) .+ 1;
 m = demo(xs);
-cb = TurkieCallback(ps) # Create a callback function to be given to sample
+cb = TurkieCallback(m) # Create a callback function to be given to sample
 chain = sample(m, NUTS(0.65), 300; callback = cb)
 ```
 
