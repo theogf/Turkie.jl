@@ -46,7 +46,7 @@ function TurkieCallback(model::Model, plots::Union{Series, AbstractVector} = [:h
     Dict(kwargs...))
 end
 
-function TurkieCallBack(varsdict::Dict; kwargs...)
+function TurkieCallback(varsdict::Dict; kwargs...)
     return TurkieCallback(varsdict, Dict(kwargs...))
 end
 
@@ -59,7 +59,7 @@ function TurkieCallback(vars::Dict, params::Dict)
     window = get!(params, :window, 1000)
 
     n_rows = length(keys(vars))
-    n_cols = maximum(length.(values(vars))) 
+    n_cols = maximum(length.(values(vars)))
     n_plots = n_rows * n_cols
     iter = Node(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int64))
@@ -98,7 +98,7 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
         end
     end
     cb.iter[] += 1
-    if haskey(cb.params, :io) 
+    if haskey(cb.params, :io)
         recordframe!(cb.params[:io])
     end
 end
