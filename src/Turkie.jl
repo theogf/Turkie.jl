@@ -67,7 +67,7 @@ function TurkieCallback(vars::Dict, params::Dict)
     axis_dict = Dict()
     for (i, (variable, plots)) in enumerate(vars)
         data[variable] = MovingWindow(window, Float32)
-        axis_dict[(variable, :varname)] = layout[i, 1, Left()] = LText(scene, string(variable), textsize = 30)
+        axis_dict[(variable, :varname)] = layout[i, 1, Left()] = Label(scene, string(variable), textsize = 30)
         axis_dict[(variable, :varname)].padding = (0, 50, 0, 0)
         onlineplot!(scene, layout, axis_dict, plots, iter, data, variable, i)
     end

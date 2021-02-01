@@ -12,7 +12,7 @@ KernelDensity = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
 
 [compat]
-AbstractPlotting = "0.12, 0.13, 0.14, 0.15"
+AbstractPlotting = "0.15"
 ColorSchemes = "3.10"
 Colors = "0.12"
 DynamicPPL = "0.9, 0.10"
