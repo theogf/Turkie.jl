@@ -1,6 +1,6 @@
 function onlineplot!(scene, layout, axis_dict, stats::Series, iter, data, variable, i)
     for (j, stat) in enumerate(stats.stats)
-        axis_dict[(variable, stat)] = layout[i, j] = LAxis(scene, title = "$(name(stat))")
+        axis_dict[(variable, stat)] = layout[i, j] = Axis(scene, title = "$(name(stat))")
         onlineplot!(axis_dict[(variable, stat)], stat, iter, data[variable], data[:iter], i, j)
         tight_ticklabel_spacing!(axis_dict[(variable, stat)])
     end
@@ -8,7 +8,7 @@ end
 
 function onlineplot!(scene, layout, axis_dict, stats::AbstractVector, iter, data, variable, i)
     for (j, stat) in enumerate(stats)
-        axis_dict[(variable, stat)] = layout[i, j] = LAxis(scene, title = "$(name(stat))")
+        axis_dict[(variable, stat)] = layout[i, j] = Axis(scene, title = "$(name(stat))")
         onlineplot!(axis_dict[(variable, stat)], stat, iter, data[variable], data[:iter], i, j)
         tight_ticklabel_spacing!(axis_dict[(variable, stat)])
     end
