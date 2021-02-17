@@ -1,5 +1,9 @@
 # Turing + Makie -> Turkie!
 
+<p align="center">
+  <img width="340" height="276" src="Turkie-logo.png">
+</p>
+
 WIP for an inference visualization package.
 
 This package is not registered at the moment and will probably be merged with [TuringCallbacks](https://github.com/torfjelde/TuringCallbacks.jl) at some point.
