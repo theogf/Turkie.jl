@@ -1,11 +1,10 @@
 using Turing
 using Turkie
-using OnlineStats
-using GLMakie
-@model function demo(x)
-    v ~ InverseGamma(3, 2)
-    s ~ InverseGamma(2, v)
-    m ~ Normal(0, √s)
+using Makie # You could also use CairoMakie or another backend
+@model function demo(x) # Some random Turing model
+    m0 ~ Normal(0, 2)
+    s ~ InverseGamma(2, 3)
+    m ~ Normal(m0, √s)
     for i in eachindex(x)
         x[i] ~ Normal(m, √s)
     end
@@ -13,13 +12,11 @@ end
 
 xs = randn(100) .+ 1;
 m = demo(xs);
+cb = TurkieCallback(m) # Create a callback function to be given to the sample function
+chain = sample(m, NUTS(0.65), 300; callback = cb)
 
-cb = TurkieCallback(m);
-# chain = sample(m,  HMC(0.5, 10), 40; callback = cb);
-chain = sample(m,  NUTS(0.65), 500; callback = cb);
 
-# using Makie
-# record(cb.scene, joinpath(@__DIR__, "video.gif")) do io
-#     addIO!(cb, io)
-#     sample(m,  NUTS(0.65), 300; callback = cb)
-# end
+record(cb.scene, joinpath(@__DIR__, "video.gif")) do io
+    addIO!(cb, io)
+    sample(m,  NUTS(0.65), 50; callback = cb)
+end

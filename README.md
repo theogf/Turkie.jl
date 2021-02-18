@@ -1,9 +1,12 @@
 # Turing + Makie -> Turkie!
 
 <p align="center">
-  <img width="340" height="276" src="Turkie-logo.png">
+  <img width="340" height="276" src="docs/assets/Turkie-logo.png">
 </p>
 
+<p align="center">
+  <img src="docs/assets/Turkie-demo.gif">
+</p>
 WIP for an inference visualization package.
 
 This package is being registered at the moment.
@@ -39,18 +42,18 @@ using Turing
 using Turkie
 using Makie # You could also use CairoMakie or another backend
 @model function demo(x) # Some random Turing model
-    v ~ InverseGamma(3, 2)
+    m0 ~ Normal(0, 2)
     s ~ InverseGamma(2, 3)
-    m ~ Normal(0, √s)
+    m ~ Normal(m0, √s)
     for i in eachindex(x)
         x[i] ~ Normal(m, √s)
     end
 end
 
-xs = randn(100) .+ 1;
-m = demo(xs);
-cb = TurkieCallback(m) # Create a callback function to be given to sample
-chain = sample(m, NUTS(0.65), 300; callback = cb)
+xs = randn(100) .+ 1 # Create some random data
+m = demo(xs) # Create the model
+cb = TurkieCallback(m) # Create a callback function to be given to the sample
+chain = sample(m, NUTS(0.65), 300; callback = cb) # Sample and plot at the same time
 ```
 
 If you want to show only some variables you can give a `Dict` to `TurkieCallback` :
