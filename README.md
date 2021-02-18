@@ -59,7 +59,7 @@ chain = sample(m, NUTS(0.65), 300; callback = cb) # Sample and plot at the same 
 If you want to show only some variables you can give a `Dict` to `TurkieCallback` :
 
 ```julia
-cb = TurkieCallback(Dict(:v => [:trace, :mean],
+cb = TurkieCallback(Dict(:m0 => [:trace, :mean],
                         :s => [:autocov, :var]))
 
 ```

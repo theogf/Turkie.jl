@@ -18,13 +18,13 @@ function onlineplot!(axis, stat::Symbol, args...)
     onlineplot!(axis, Val(stat), args...)
 end
 
-onlineplot!(axis, stat::Val{:mean}, args...) = onlineplot!(axis, Mean(), args...)
+onlineplot!(axis, ::Val{:mean}, args...) = onlineplot!(axis, Mean(), args...)
 
-onlineplot!(axis, stat::Val{:var}, args...) = onlineplot!(axis, Variance(), args...)
+onlineplot!(axis, ::Val{:var}, args...) = onlineplot!(axis, Variance(), args...)
 
-onlineplot!(axis, stat::Val{:autocov}, args...) = onlineplot!(axis, AutoCov(20), args...)
+onlineplot!(axis, ::Val{:autocov}, args...) = onlineplot!(axis, AutoCov(20), args...)
 
-onlineplot!(axis, stat::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32), args...)
+onlineplot!(axis, ::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32), args...)
 
 
 # Generic fallback for OnlineStat objects
@@ -46,7 +46,7 @@ function onlineplot!(axis, stat::T, iter, data, iterations, i, j) where {T<:Onli
 end
 
 
-function onlineplot!(axis, stat::Val{:trace}, iter, data, iterations, i, j)
+function onlineplot!(axis, ::Val{:trace}, iter, data, iterations, i, j)
     trace = lift(iter; init = [Point2f0(0, 0f0)]) do i
         Point2f0.(value(iterations), value(data))
     end
@@ -75,7 +75,7 @@ function expand_extrema(xs)
     return (xmin, xmax)
 end
 
-function onlineplot!(axis, stat::Val{:kde}, iter, data, iterations, i, j)
+function onlineplot!(axis, ::Val{:kde}, iter, data, iterations, i, j)
     interpkde = Node(InterpKDE(kde([1f0])))
     on(iter) do i
         interpkde[] = InterpKDE(kde(value(data)))
@@ -89,7 +89,7 @@ function onlineplot!(axis, stat::Val{:kde}, iter, data, iterations, i, j)
     lines!(axis, xs, kde_pdf, color = std_colors[i], linewidth = 3.0)
 end
 
-function onlineplot!(axis, stat::Val{:histkde}, iter, data, iterations, i, j)
+function onlineplot!(axis, ::Val{:histkde}, iter, data, iterations, i, j)
     onlineplot!(axis, KHist(50), iter, data, iterations, i, j)
     onlineplot!(axis, Val(:kde), iter, data, iterations, i, j)
 end

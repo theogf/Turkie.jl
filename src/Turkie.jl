@@ -10,7 +10,7 @@ using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
 using DynamicPPL: VarInfo, Model
 
-export TurkieParams, TurkieCallback
+export TurkieCallback
 
 export addIO!, record
 
