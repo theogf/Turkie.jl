@@ -18,7 +18,8 @@ include("online_stats_plots.jl")
 
 const std_colors = ColorSchemes.seaborn_colorblind
 
-name(s::Symbol) = string(s)
+name(s::Symbol) = name(Val(s))
+name(::Val{T}) where {T} = string(T)
 name(s::OnlineStat) = nameof(typeof(s))
 
 """
@@ -72,7 +73,7 @@ function TurkieCallback(vars::Dict, params::Dict)
         onlineplot!(scene, layout, axis_dict, plots, iter, data, variable, i)
     end
     on(iter) do i
-        if i > 10 # To deal with autolimits a certain number of samples are needed
+        if i > 1 # To deal with autolimits a certain number of samples are needed
             for (variable, plots) in vars
                 for p in plots
                     autolimits!(axis_dict[(variable, p)])

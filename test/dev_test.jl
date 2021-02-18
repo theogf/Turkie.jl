@@ -1,7 +1,7 @@
 using Turing
 using Turkie
 using Makie # You could also use CairoMakie or another backend
-@model function demo(x) # Some random Turing model
+Turing.@model function demo(x) # Some random Turing model
     m0 ~ Normal(0, 2)
     s ~ InverseGamma(2, 3)
     m ~ Normal(m0, √s)

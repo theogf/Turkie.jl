@@ -1,6 +1,7 @@
 function onlineplot!(scene, layout, axis_dict, stats::Series, iter, data, variable, i)
     for (j, stat) in enumerate(stats.stats)
         axis_dict[(variable, stat)] = layout[i, j] = Axis(scene, title = "$(name(stat))")
+        limits!(layout[i, j], 0, 10, -1, 1)
         onlineplot!(axis_dict[(variable, stat)], stat, iter, data[variable], data[:iter], i, j)
         tight_ticklabel_spacing!(axis_dict[(variable, stat)])
     end
@@ -45,7 +46,6 @@ function onlineplot!(axis, stat::T, iter, data, iterations, i, j) where {T<:Onli
     lines!(axis, statpoints, color = std_colors[i], linewidth = 3.0)
 end
 
-
 function onlineplot!(axis, ::Val{:trace}, iter, data, iterations, i, j)
     trace = lift(iter; init = [Point2f0(0, 0f0)]) do i
         Point2f0.(value(iterations), value(data))
@@ -89,6 +89,8 @@ function onlineplot!(axis, ::Val{:kde}, iter, data, iterations, i, j)
     lines!(axis, xs, kde_pdf, color = std_colors[i], linewidth = 3.0)
 end
 
+name(s::Val{:histkde}) = "Hist + KDE"
+
 function onlineplot!(axis, ::Val{:histkde}, iter, data, iterations, i, j)
     onlineplot!(axis, KHist(50), iter, data, iterations, i, j)
     onlineplot!(axis, Val(:kde), iter, data, iterations, i, j)
@@ -103,6 +105,6 @@ function onlineplot!(axis, stat::AutoCov, iter, data, iterations, i, j)
     statvals = lift(stat; init = zeros(Float32, b + 1)) do s
         value(s)
     end
-    scatter!(axis, Point2f0.([0.0, 0.0], [-0.0, 1.0]), markersize = 0.0, color = RGBA(0.0, 0.0, 0.0, 0.0)) # Invisible points to keep limits fixed
+    scatter!(axis, Point2f0.([0.0, b], [-0.1, 1.0]), markersize = 0.0, color = RGBA(0.0, 0.0, 0.0, 0.0)) # Invisible points to keep limits fixed
     lines!(axis, 0:b, statvals, color = std_colors[i], linewidth = 3.0)
 end
