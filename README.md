@@ -6,17 +6,19 @@
 
 WIP for an inference visualization package.
 
-This package is not registered at the moment and will probably be merged with [TuringCallbacks](https://github.com/torfjelde/TuringCallbacks.jl) at some point.
+This package is being registered at the moment.
 To try it nonetheless run :
 ```
 ] add https://github.com/theogf/Turkie.jl
 ```
+
 
 ### To plot during sampling :
 - [x] Trace of the chains
 - [x] Statistics (mean and var)
 - [x] Marginals (KDE/Histograms)
 - [x] Autocorrelation plots
+- [ ] Show multiple chains
 
 ### Additional features :
 - [x] Selecting which variables are plotted
