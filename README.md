@@ -1,3 +1,7 @@
+[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
+[![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
+![BuildStatus](https://github.com/theogf/Turkie.jl/workflows/CI/badge.svg)
+
 # Turing + Makie -> Turkie!
 
 <p align="center">
@@ -8,13 +12,6 @@
   <img src="docs/assets/Turkie-demo.gif">
 </p>
 WIP for an inference visualization package.
-
-This package is being registered at the moment.
-To try it nonetheless run :
-```
-] add https://github.com/theogf/Turkie.jl
-```
-
 
 ### To plot during sampling :
 - [x] Trace of the chains
@@ -59,7 +56,7 @@ chain = sample(m, NUTS(0.65), 300; callback = cb) # Sample and plot at the same 
 If you want to show only some variables you can give a `Dict` to `TurkieCallback` :
 
 ```julia
-cb = TurkieCallback(Dict(:v => [:trace, :mean],
+cb = TurkieCallback(Dict(:m0 => [:trace, :mean],
                         :s => [:autocov, :var]))
 
 ```
