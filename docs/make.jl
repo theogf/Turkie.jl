@@ -13,7 +13,6 @@ makedocs(;
     modules=[Turkie],
     pages=[
         "Home" => "index.md",
-        "API" => "api.md",
     ],
     strict=true,
     checkdocs=:exports,
