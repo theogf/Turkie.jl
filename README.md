@@ -1,3 +1,7 @@
+[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
+[![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
+![BuildStatus](https://github.com/theogf/Turkie.jl/workflows/CI/badge.svg)
+
 # Turing + Makie -> Turkie!
 
 <p align="center">
@@ -8,13 +12,6 @@
   <img src="docs/assets/Turkie-demo.gif">
 </p>
 WIP for an inference visualization package.
-
-This package is being registered at the moment.
-To try it nonetheless run :
-```
-] add https://github.com/theogf/Turkie.jl
-```
-
 
 ### To plot during sampling :
 - [x] Trace of the chains
