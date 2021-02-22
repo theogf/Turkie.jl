@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/theogf/Turkie.jl.git", push_preview=false
+    repo="github.com/theogf/Turkie.jl.git", push_preview=true
 )
