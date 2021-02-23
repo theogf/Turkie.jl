@@ -9,7 +9,7 @@
 
 
 <p align="center">
-  <img src="docs/assets/Turkie-demo.gif">
+  <img src="docs/src/assets/Turkie-demo.gif">
 </p>
 WIP for an inference visualization package.
 
