@@ -1,11 +1,8 @@
 # Turkie.jl
-[![Turkie.jl](assets/Turkie-logo.png)](https://github.com/theogf/Turkie.jl)
+[![Turkie.jl](/assets/Turkie-logo.png)](https://github.com/theogf/Turkie.jl)
 
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
 [![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
-![BuildStatus](https://github.com/theogf/Turkie.jl/workflows/CI/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/theogf/Turkie.jl/badge.svg?branch=master)](https://coveralls.io/github/theogf/Turkie.jl?branch=master)
-
 
 A [Julia](http://julialang.org) package for vizualizing dynamically sampling and statistics of Bayesian models
 ***
@@ -42,7 +39,8 @@ chain = sample(m, NUTS(0.65), 300; callback = cb) # Sample and plot at the same 
 ```
 
 You should observe something like this :
-![Turkie Video](assets/Turkie-demo.webm)
+
+![Turkie Video](/assets/Turkie-demo.webm)
 
 ## The example in details
 
