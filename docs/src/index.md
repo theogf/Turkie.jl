@@ -1,5 +1,5 @@
 # Turkie.jl
-[![Turkie.jl](assets/Turkie-logo.png)](https://github.com/theogf/Turkie.jl)
+[![Turkie.jl](/assets/Turkie-logo.png)](https://github.com/theogf/Turkie.jl)
 
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
 [![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
@@ -42,7 +42,8 @@ chain = sample(m, NUTS(0.65), 300; callback = cb) # Sample and plot at the same 
 ```
 
 You should observe something like this :
-![Turkie Video](assets/Turkie-demo.webm)
+
+![Turkie Video](/assets/Turkie-demo.webm)
 
 ## The example in details
 
