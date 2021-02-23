@@ -4,8 +4,9 @@
 # Turing + Makie -> Turkie!
 
 <p align="center">
-  <img width="340" height="276" src="docs/assets/Turkie-logo.png">
+  <img width="340" height="276" src="docs/src/assets/Turkie-logo.png">
 </p>
+
 
 <p align="center">
   <img src="docs/assets/Turkie-demo.gif">
