@@ -3,9 +3,6 @@
 
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
 [![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
-![BuildStatus](https://github.com/theogf/Turkie.jl/workflows/CI/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/theogf/Turkie.jl/badge.svg?branch=master)](https://coveralls.io/github/theogf/Turkie.jl?branch=master)
-
 
 A [Julia](http://julialang.org) package for vizualizing dynamically sampling and statistics of Bayesian models
 ***
