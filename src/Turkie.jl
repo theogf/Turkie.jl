@@ -60,6 +60,8 @@ function TurkieCallback(vars::Dict, params::Dict)
     outer_padding = 5
     scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
     window = get!(params, :window, 1000)
+    refresh = get!(params, :refresh, false)
+    params[:t0] = 0
     iter = Node(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
     obs = Dict{Symbol, Any}()
@@ -80,6 +82,7 @@ function TurkieCallback(vars::Dict, params::Dict)
         end
     end
     MakieLayout.trim!(layout)
+    display(scene)
     TurkieCallback(scene, data, axis_dict, vars, params, iter)
 end
 
@@ -88,7 +91,13 @@ function addIO!(cb::TurkieCallback, io)
 end
 
 function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
-    fit!(cb.data[:iter], iteration)
+    if iteration == 1
+        if cb.params[:refresh]
+            refresh_plots!(cb)
+        end
+        cb.params[:t0] = cb.iter[] 
+    end
+    fit!(cb.data[:iter], iteration + cb.params[:t0])
     for (vals, ks) in values(transition.θ)
         for (k, val) in zip(ks, vals)
             if haskey(cb.data, Symbol(k))
@@ -100,6 +109,10 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
     if haskey(cb.params, :io)
         recordframe!(cb.params[:io])
     end
+end
+
+function refresh_plots!(cb)
+    #TODO
 end
 
 end
