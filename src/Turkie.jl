@@ -5,6 +5,7 @@ using AbstractPlotting: barplot!, lines!, scatter! # Plotting tools
 using AbstractPlotting: Observable, Node, lift, on # Observable tools
 using AbstractPlotting: recordframe! # Recording tools
 using AbstractPlotting.MakieLayout # Layouting tool
+using AverageShiftedHistograms
 using Colors, ColorSchemes # Colors tools
 using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
@@ -64,7 +65,6 @@ function TurkieCallback(vars::Dict, params::Dict)
     n_plots = n_rows * n_cols
     iter = Node(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int64))
-    obs = Dict{Symbol, Any}()
     axis_dict = Dict()
     for (i, (variable, plots)) in enumerate(vars)
         data[variable] = MovingWindow(window, Float32)

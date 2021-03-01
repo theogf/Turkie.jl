@@ -27,6 +27,7 @@ onlineplot!(axis, ::Val{:autocov}, args...) = onlineplot!(axis, AutoCov(20), arg
 
 onlineplot!(axis, ::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32), args...)
 
+onlineplot!(axis, ::Val{:ash}, args...) = onlineplot!(axis, ash(randn(Float32, 50)), args...)
 
 # Generic fallback for OnlineStat objects
 function onlineplot!(axis, stat::T, iter, data, iterations, i, j) where {T<:OnlineStat}
@@ -94,6 +95,30 @@ name(s::Val{:histkde}) = "Hist + KDE"
 function onlineplot!(axis, ::Val{:histkde}, iter, data, iterations, i, j)
     onlineplot!(axis, KHist(50), iter, data, iterations, i, j)
     onlineplot!(axis, Val(:kde), iter, data, iterations, i, j)
+end
+
+function onlineplot!(axis, hist::AverageShiftedHistograms.Ash, iter, data, iterations, i, j)
+    hist = Node(hist)
+    on(iter) do i
+        if i == min(20, data.b ÷ 10)
+            hist[] = ash(value(data), m=hist[].m, kernel=hist[].kernel)
+        else
+            ash!(hist[], value(data))
+        end
+    end
+    xs = lift(iter; init = range(0.0, 2.0, length=200)) do i
+        range(expand_extrema(extrema(value(data)))..., length = 200)
+    end
+    ash_pdf = lift(xs) do xs
+        AverageShiftedHistograms.pdf.(Ref(hist[]), xs)
+    end
+    ash_hist = lift(hist; init = Point2f0.(range(0, 1, length = length(hist[].rng)), zeros(Float32, length(hist[].rng)))) do h
+        edges, weights = AverageShiftedHistograms.xy(h)
+        # weights = nobs(h) > 1 ? weights / OnlineStats.area(h) : weights
+        return Point2f0.(edges, weights)
+    end
+    barplot!(axis, ash_hist, color = std_colors[i])
+    lines!(axis, xs, ash_pdf, color = :black, linewidth = 3.0)
 end
 
 function onlineplot!(axis, stat::AutoCov, iter, data, iterations, i, j)

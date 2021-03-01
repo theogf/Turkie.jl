@@ -13,6 +13,8 @@ end
 xs = randn(100) .+ 1;
 m = demo(xs);
 cb = TurkieCallback(m) # Create a callback function to be given to the sample function
+cb = TurkieCallback(Dict(:m => [:ash]))
+
 chain = sample(m, NUTS(0.65), 300; callback = cb)
 
 

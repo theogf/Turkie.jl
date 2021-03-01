@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
+AverageShiftedHistograms = "77b51b56-6f8f-5c3a-9cb4-d71f9594ea6e"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DynamicPPL = "366bfd00-2699-11ea-058f-f148b4cae6d8"
@@ -13,6 +14,7 @@ OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
 
 [compat]
 AbstractPlotting = "0.15"
+AverageShiftedHistograms = "0.8"
 ColorSchemes = "3.10"
 Colors = "0.12"
 DynamicPPL = "0.9, 0.10"
