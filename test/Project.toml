@@ -1,2 +1,6 @@
 [deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
 Soss = "8ce77f84-9b61-11e8-39ff-d17a774bf41c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"

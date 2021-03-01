@@ -20,17 +20,15 @@ const std_colors = ColorSchemes.seaborn_colorblind
 
 name(s::Symbol) = name(Val(s))
 name(::Val{T}) where {T} = string(T)
-name(s::OnlineStat) = nameof(typeof(s))
+name(s::OnlineStat) = string(nameof(typeof(s)))
 
 """
-    TurkieCallback(model::DynamicPPL.Model, plots::Series/AbstractVector = )
+    TurkieCallback(model::DynamicPPL.Model, plots::Series/AbstractVector; window=1000, kwargs...)
 
-    ## Keyword arguments
-    - `showtrace=true` : Show the trace of the variable
-    - `window=0` : Use a window for plotting the trace, 0 will not use a window
-
+## Keyword arguments
+- `window=1000` : Use a window for plotting the trace
 """
-TurkieCallBack
+TurkieCallback
 
 struct TurkieCallback
     scene::Scene
@@ -38,32 +36,32 @@ struct TurkieCallback
     axis_dict::Dict
     vars::Dict{Symbol, Any}
     params::Dict{Any, Any}
-    iter::Observable{Int64}
+    iter::Observable{Int}
 end
 
-function TurkieCallback(model::Model, plots::Union{Series, AbstractVector} = [:histkde, Mean(), Variance(), AutoCov(20)]; kwargs...)
+function TurkieCallback(model::Model, plots::Series; kwargs...)
+    return TurkieCallback(model, collect(s.stats); kwargs...)
+end
+
+function TurkieCallback(model::Model, plots::AbstractVector = [:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]; kwargs...)
     variables = VarInfo(model).metadata
-    return TurkieCallback(Dict(Pair.(keys(variables), Ref(plots))),
-    Dict(kwargs...))
+    return TurkieCallback(
+        Dict(Pair.(keys(variables), Ref(plots)));
+        kwargs...
+        )
 end
 
 function TurkieCallback(varsdict::Dict; kwargs...)
-    return TurkieCallback(varsdict, Dict(kwargs...))
+    return TurkieCallback(varsdict, Dict{Symbol,Any}(kwargs...))
 end
 
 function TurkieCallback(vars::Dict, params::Dict)
 # Create a scene and a layout
     outer_padding = 5
     scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
-    display(scene)
-
     window = get!(params, :window, 1000)
-
-    n_rows = length(keys(vars))
-    n_cols = maximum(length.(values(vars)))
-    n_plots = n_rows * n_cols
     iter = Node(0)
-    data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int64))
+    data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
     obs = Dict{Symbol, Any}()
     axis_dict = Dict()
     for (i, (variable, plots)) in enumerate(vars)
