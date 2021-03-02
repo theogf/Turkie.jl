@@ -2,6 +2,7 @@ using Turkie
 using Test
 using CairoMakie
 using OnlineStats
+using Turing
 
 @testset "Turkie.jl" begin
     Turing.@model function demo(x) # Some random Turing model
@@ -45,7 +46,7 @@ using OnlineStats
         end 
         @testset "Series" begin
             for stat in [Mean(Float32), Variance(Float32)]
-                global cb = TurkieCallback(Dict(:m => OnlineStats.Series(stat)))
+                global cb = TurkieCallback(model, OnlineStats.Series(stat))
                 @test_nowarn sample(model, MH(), 50; callback = cb)
             end
         end

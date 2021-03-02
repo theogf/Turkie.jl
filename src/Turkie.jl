@@ -40,7 +40,7 @@ struct TurkieCallback
 end
 
 function TurkieCallback(model::Model, plots::Series; kwargs...)
-    return TurkieCallback(model, collect(s.stats); kwargs...)
+    return TurkieCallback(model, collect(plots.stats); kwargs...)
 end
 
 function TurkieCallback(model::Model, plots::AbstractVector = [:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]; kwargs...)
