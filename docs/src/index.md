@@ -80,7 +80,7 @@ In these vectors you can either throw a symbol from the following list:
 - `:trace` : The trace of the variable (every value)
 - `:hist` : An histogram of the variable
 - `:kde` : A KDE estimation of the variable
-- `:kdehist` : A KDE estimation combined with an histogram
+- `:histkde` : A KDE estimation combined with an histogram
 - `:autocov` : The sample auto-covariance
 
 You can also pass an `OnlineStat` object from [`OnlineStats.jl`](https://github.com/joshday/OnlineStats.jl).

@@ -1,6 +1,7 @@
 using Turing
 using Turkie
-using Makie # You could also use CairoMakie or another backend
+using GLMakie # You could also use CairoMakie or another backend
+GLMakie.activate!()
 Turing.@model function demo(x) # Some random Turing model
     m0 ~ Normal(0, 2)
     s ~ InverseGamma(2, 3)
@@ -13,7 +14,7 @@ end
 xs = randn(100) .+ 1;
 m = demo(xs);
 cb = TurkieCallback(m) # Create a callback function to be given to the sample function
-chain = sample(m, NUTS(0.65), 300; callback = cb)
+chain = sample(m, NUTS(0.65), 30; callback = cb)
 
 
 record(cb.scene, joinpath(@__DIR__, "video.gif")) do io
