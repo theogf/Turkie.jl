@@ -41,13 +41,13 @@ using Turing
         @testset "Vector of symbols" begin
             for stat in [:histkde, :kde, :hist, :mean, :var, :trace, :autocov]
                 cb = TurkieCallback(Dict(:m => [stat]))
-                @test_nowarn sample(model, MH(), 50; callback = cb) 
+                sample(model, MH(), 50; callback = cb) 
             end
         end 
         @testset "Series" begin
             for stat in [Mean(Float32), Variance(Float32)]
-                global cb = TurkieCallback(model, OnlineStats.Series(stat))
-                @test_nowarn sample(model, MH(), 50; callback = cb)
+                cb = TurkieCallback(model, OnlineStats.Series(stat))
+                sample(model, MH(), 50; callback = cb)
             end
         end
     end
