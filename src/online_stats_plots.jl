@@ -24,11 +24,11 @@ onlineplot!(axis, ::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32),
 function onlineplot!(axis, stat::T, iter, data, iterations, i, j) where {T<:OnlineStat}
     window = data.b
     @eval TStat = $(nameof(T))
-    stat = Node(TStat(Float32))
+    stat = Observable(TStat(Float32))
     on(iter) do i
         stat[] = fit!(stat[], last(value(data)))
     end
-    statvals = Node(MovingWindow(window, Float32))
+    statvals = Observable(MovingWindow(window, Float32))
     on(stat) do s
         statvals[] = fit!(statvals[], Float32(value(s)))
     end
@@ -39,7 +39,7 @@ function onlineplot!(axis, stat::T, iter, data, iterations, i, j) where {T<:Onli
 end
 
 function onlineplot!(axis, ::Val{:trace}, iter, data, iterations, i, j)
-    trace = lift(iter; init = [Point2f0(0, 0f0)]) do i
+    trace = lift(iter; init = [Point2f0(0f0, 0f0)]) do i
         Point2f0.(value(iterations), value(data))
     end
     lines!(axis, trace, color = std_colors[i]; linewidth = 3.0)
@@ -47,7 +47,7 @@ end
 
 function onlineplot!(axis, stat::KHist, iter, data, iterations, i, j)
     nbins = stat.k
-    stat = Node(KHist(nbins, Float32))
+    stat = Observable(KHist(nbins, Float32))
     on(iter) do i
         stat[] = fit!(stat[], last(value(data)))
     end
@@ -68,7 +68,7 @@ function expand_extrema(xs)
 end
 
 function onlineplot!(axis, ::Val{:kde}, iter, data, iterations, i, j)
-    interpkde = Node(InterpKDE(kde([1f0])))
+    interpkde = Observable(InterpKDE(kde([1f0])))
     on(iter) do i
         interpkde[] = InterpKDE(kde(value(data)))
     end
@@ -90,7 +90,7 @@ end
 
 function onlineplot!(axis, stat::AutoCov, iter, data, iterations, i, j)
     b = length(stat.cross)
-    stat = Node(AutoCov(b, Float32))
+    stat = Observable(AutoCov(b, Float32))
     on(iter) do i
         stat[] = fit!(stat[], last(value(data)))
     end
