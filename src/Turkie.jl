@@ -8,7 +8,7 @@ using AbstractPlotting.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools
 using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
-using DynamicPPL: VarInfo, Model
+using Turing: DynamicPPL.VarInfo, DynamicPPL.Model, Inference._params_to_array
 
 export TurkieCallback
 
@@ -23,19 +23,31 @@ name(::Val{T}) where {T} = string(T)
 name(s::OnlineStat) = string(nameof(typeof(s)))
 
 """
-    TurkieCallback(model::DynamicPPL.Model, plots::Series/AbstractVector; window=1000, kwargs...)
+    TurkieCallback(args...; kwargs....)
+    
+## Arguments
+- Option 1 : 
+    `model::DynamicPPL.Model, plots::Series/AbstractVector=[:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]`
 
+For each of the variables of the given model each `plot` from `plots` will be plotted
+Multidimensional variable will be automatically have indices added to them
+- Option 2 :
+    `vars::NamedTuple/Dict`
+Will plot each pair of symbol and series of plots.
+Note that for multidimensional variable you should pass a Symbol as `Symbol("m[1]")` for example.
+See the docs for some examples.
 ## Keyword arguments
 - `window=1000` : Use a window for plotting the trace
+- `refresh=false` : Restart the plots from scratch everytime `sample` is called again (still WIP)
 """
 TurkieCallback
 
-struct TurkieCallback
+struct TurkieCallback{TN<:NamedTuple,TD<:AbstractDict}
     scene::Scene
     data::Dict{Symbol, MovingWindow}
     axis_dict::Dict
-    vars::Dict{Symbol, Any}
-    params::Dict{Any, Any}
+    vars::TN
+    params::TD
     iter::Observable{Int}
 end
 
@@ -44,38 +56,39 @@ function TurkieCallback(model::Model, plots::Series; kwargs...)
 end
 
 function TurkieCallback(model::Model, plots::AbstractVector = [:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]; kwargs...)
-    variables = VarInfo(model).metadata
+    vars, vals = _params_to_array([VarInfo(model)])
     return TurkieCallback(
-        Dict(Pair.(keys(variables), Ref(plots)));
+        (;Pair.(vars, Ref(plots))...); # Return a named Tuple
         kwargs...
-        )
+    )
 end
 
-function TurkieCallback(varsdict::Dict; kwargs...)
-    return TurkieCallback(varsdict, Dict{Symbol,Any}(kwargs...))
+function TurkieCallback(vars::Union{Dict, NamedTuple}; kwargs...)
+    return TurkieCallback((;vars...), Dict{Symbol,Any}(kwargs...))
 end
 
-function TurkieCallback(vars::Dict, params::Dict)
+function TurkieCallback(vars::NamedTuple, params::Dict)
 # Create a scene and a layout
     outer_padding = 5
     scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
     window = get!(params, :window, 1000)
     refresh = get!(params, :refresh, false)
     params[:t0] = 0
-    iter = Node(0)
+    iter = Observable(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
     obs = Dict{Symbol, Any}()
     axis_dict = Dict()
-    for (i, (variable, plots)) in enumerate(vars)
+    for (i, variable) in enumerate(keys(vars))
+        plots = vars[variable]
         data[variable] = MovingWindow(window, Float32)
         axis_dict[(variable, :varname)] = layout[i, 1, Left()] = Label(scene, string(variable), textsize = 30)
-        axis_dict[(variable, :varname)].padding = (0, 50, 0, 0)
+        axis_dict[(variable, :varname)].padding = (0, 60, 0, 0)   
         onlineplot!(scene, layout, axis_dict, plots, iter, data, variable, i)
     end
     on(iter) do i
         if i > 1 # To deal with autolimits a certain number of samples are needed
-            for (variable, plots) in vars
-                for p in plots
+            for variable in keys(vars)
+                for p in vars[variable]
                     autolimits!(axis_dict[(variable, p)])
                 end
             end
@@ -97,12 +110,10 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
         end
         cb.params[:t0] = cb.iter[] 
     end
-    fit!(cb.data[:iter], iteration + cb.params[:t0])
-    for (vals, ks) in values(transition.θ)
-        for (k, val) in zip(ks, vals)
-            if haskey(cb.data, Symbol(k))
-                fit!(cb.data[Symbol(k)], Float32(val))
-            end
+    fit!(cb.data[:iter], iteration + cb.params[:t0]) # Update the iteration value
+    for (variable, val) in zip(_params_to_array([transition])...)
+        if haskey(cb.data, variable) # Check if symbol should be plotted
+            fit!(cb.data[variable], Float32(val)) # Update its value
         end
     end
     cb.iter[] += 1

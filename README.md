@@ -58,15 +58,18 @@ chain = sample(m, NUTS(0.65), 300; callback = cb) # Sample and plot at the same 
 If you want to show only some variables you can give a `Dict` to `TurkieCallback` :
 
 ```julia
-cb = TurkieCallback(Dict(:m0 => [:trace, :mean],
-                        :s => [:autocov, :var]))
+cb = TurkieCallback(
+            (m0 = [:trace, :mean], s = [:autocov, :var])
+          )
 
 ```
 
 You can also directly pass `OnlineStats` object : 
 ```julia
 using OnlineStats
-cb = TurkieCallback(Dict(:v => [Mean(), AutoCov(20)]))
+cb = TurkieCallback(
+            (v = [Mean(), AutoCov(20)],)
+          )
 ```
 
 If you want to record the video do
