@@ -66,11 +66,13 @@ While sampling the callback object `cb` will be called and the statistics will b
 ## Tuning the quantities
 
 Of course the default is not always desirable.
-You can chose what variables and what quantities are shown by giving a `Dict` to `TurkieCallback` instead of a model.
+You can chose what variables and what quantities are shown by giving a `NamedTuple` to `TurkieCallback` instead of a model.
 For example,
 ```julia
-cb = TurkieCallback(Dict(:v => [:trace, :mean],
-                        :s => [:autocov, :var]))
+cb = TurkieCallback(
+                (v = [:trace, :mean],
+                s = [:autocov, :var])
+            )
 ```
 will only show the trace and the sample mean of `v` and the auto-covariance and variance of `s`.
 Pairs should be of the type `{Symbol,AbstractVector}`.
