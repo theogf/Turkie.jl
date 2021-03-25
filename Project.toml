@@ -12,7 +12,7 @@ OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
-AbstractPlotting = "0.15"
+AbstractPlotting = "0.15, 0.16"
 ColorSchemes = "3.10"
 Colors = "0.12"
 KernelDensity = "0.5, 0.6"
