@@ -39,7 +39,7 @@ Small example:
 ```julia
 using Turing
 using Turkie
-using Makie # You could also use CairoMakie or another backend
+using GLMakie # You could also use CairoMakie or another backend
 @model function demo(x) # Some random Turing model
     m0 ~ Normal(0, 2)
     s ~ InverseGamma(2, 3)
@@ -76,7 +76,7 @@ If you want to record the video do
 
 ```julia
 using Makie
-record(cb.scene, joinpath(@__DIR__, "video.webm")) do io
+record(cb, joinpath(@__DIR__, "video.webm")) do io
     addIO!(cb, io)
     sample(m,  NUTS(0.65), 300; callback = cb)
 end

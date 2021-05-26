@@ -1,21 +1,21 @@
 name = "Turkie"
 uuid = "8156cc02-0533-41cd-9345-13411ebe105f"
 authors = ["Theo Galy-Fajou <theo.galyfajou@gmail.com> and contributors"]
-version = "0.1.3"
+version = "0.1.4"
 
 [deps]
-AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 KernelDensity = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
-AbstractPlotting = "0.15, 0.16"
 ColorSchemes = "3.10"
 Colors = "0.12"
 KernelDensity = "0.5, 0.6"
+Makie = "0.13"
 OnlineStats = "1.5"
 Turing = "0.15"
 julia = "1.4"
