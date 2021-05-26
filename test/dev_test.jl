@@ -1,3 +1,4 @@
+using Pkg; Pkg.activate("..")
 using Turing
 using Turkie
 using GLMakie # You could also use CairoMakie or another backend
@@ -19,7 +20,7 @@ cb = TurkieCallback(m) # Create a callback function to be given to the sample fu
 chain = sample(m, NUTS(0.65), 30; callback = cb)
 
 
-record(cb.scene, joinpath(@__DIR__, "video.gif")) do io
+record(cb.figure, joinpath(@__DIR__, "video.gif")) do io
     addIO!(cb, io)
     sample(m,  NUTS(0.65), 50; callback = cb)
 end

@@ -5,3 +5,4 @@ test/video.gif
 test/video.webm
 docs/build/
 docs/Manifest.toml
+.vscode/settings.json

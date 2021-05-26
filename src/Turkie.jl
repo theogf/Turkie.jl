@@ -1,10 +1,10 @@
 module Turkie
 
-using AbstractPlotting: Scene, Point2f0
-using AbstractPlotting: barplot!, lines!, scatter! # Plotting tools
-using AbstractPlotting: Observable, Node, lift, on # Observable tools
-using AbstractPlotting: recordframe! # Recording tools
-using AbstractPlotting.MakieLayout # Layouting tool
+using Makie: Figure, Scene, Point2f0
+using Makie: barplot!, lines!, scatter! # Plotting tools
+using Makie: Observable, Node, lift, on # Observable tools
+using Makie: recordframe! # Recording tools
+using Makie.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools
 using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
@@ -16,6 +16,7 @@ export addIO!, record
 
 include("online_stats_plots.jl")
 
+ # Uses the colorblind scheme of seaborn by default
 const std_colors = ColorSchemes.seaborn_colorblind
 
 name(s::Symbol) = name(Val(s))
@@ -43,7 +44,7 @@ See the docs for some examples.
 TurkieCallback
 
 struct TurkieCallback{TN<:NamedTuple,TD<:AbstractDict}
-    scene::Scene
+    figure::Figure
     data::Dict{Symbol, MovingWindow}
     axis_dict::Dict
     vars::TN
@@ -70,7 +71,7 @@ end
 function TurkieCallback(vars::NamedTuple, params::Dict)
 # Create a scene and a layout
     outer_padding = 5
-    scene, layout = layoutscene(outer_padding, resolution = (1200, 700))
+    fig = Figure(;resolution = (1200, 700), figure_padding=outer_padding)
     window = get!(params, :window, 1000)
     refresh = get!(params, :refresh, false)
     params[:t0] = 0
@@ -81,9 +82,9 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     for (i, variable) in enumerate(keys(vars))
         plots = vars[variable]
         data[variable] = MovingWindow(window, Float32)
-        axis_dict[(variable, :varname)] = layout[i, 1, Left()] = Label(scene, string(variable), textsize = 30)
+        axis_dict[(variable, :varname)] = fig[i, 1, Left()] = Label(fig, string(variable), textsize = 30)
         axis_dict[(variable, :varname)].padding = (0, 60, 0, 0)   
-        onlineplot!(scene, layout, axis_dict, plots, iter, data, variable, i)
+        onlineplot!(fig, axis_dict, plots, iter, data, variable, i)
     end
     on(iter) do i
         if i > 1 # To deal with autolimits a certain number of samples are needed
@@ -94,16 +95,16 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
             end
         end
     end
-    MakieLayout.trim!(layout)
-    display(scene)
-    TurkieCallback(scene, data, axis_dict, vars, params, iter)
+    MakieLayout.trim!(fig.layout)
+    display(fig)
+    return TurkieCallback(fig, data, axis_dict, vars, params, iter)
 end
 
 function addIO!(cb::TurkieCallback, io)
     cb.params[:io] = io
 end
 
-function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
+function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration; kwargs...)
     if iteration == 1
         if cb.params[:refresh]
             refresh_plots!(cb)
@@ -116,7 +117,7 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, iteration)
             fit!(cb.data[variable], Float32(val)) # Update its value
         end
     end
-    cb.iter[] += 1
+    cb.iter[] = cb.iter[] + 1
     if haskey(cb.params, :io)
         recordframe!(cb.params[:io])
     end
