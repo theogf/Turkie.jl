@@ -76,7 +76,7 @@ If you want to record the video do
 
 ```julia
 using Makie
-record(cb, joinpath(@__DIR__, "video.webm")) do io
+record(cb.figure, joinpath(@__DIR__, "video.webm")) do io
     addIO!(cb, io)
     sample(m,  NUTS(0.65), 300; callback = cb)
 end
