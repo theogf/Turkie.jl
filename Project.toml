@@ -17,7 +17,7 @@ Colors = "0.12"
 KernelDensity = "0.5, 0.6"
 Makie = "0.13"
 OnlineStats = "1.5"
-Turing = "0.15"
+Turing = "0.15, 0.16"
 julia = "1.4"
 
 [extras]
