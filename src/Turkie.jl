@@ -43,11 +43,12 @@ See the docs for some examples.
 """
 TurkieCallback
 
-struct TurkieCallback{TN<:NamedTuple,TD<:AbstractDict}
+struct TurkieCallback{TN<:NamedTuple,TS<:AbstractDict,TD<:AbstractDict}
     figure::Figure
     data::Dict{Symbol, MovingWindow}
     axis_dict::Dict
     vars::TN
+    stats::TS
     params::TD
     iter::Observable{Int}
 end
@@ -57,7 +58,7 @@ function TurkieCallback(model::Model, plots::Series; kwargs...)
 end
 
 function TurkieCallback(model::Model, plots::AbstractVector = [:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]; kwargs...)
-    vars, vals = _params_to_array([VarInfo(model)])
+    vars, _ = _params_to_array([VarInfo(model)])
     return TurkieCallback(
         (;Pair.(vars, Ref(plots))...); # Return a named Tuple
         kwargs...
@@ -73,18 +74,18 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     outer_padding = 5
     fig = Figure(;resolution = (1200, 700), figure_padding=outer_padding)
     window = get!(params, :window, 1000)
-    refresh = get!(params, :refresh, false)
+    get!(params, :refresh, false)
     params[:t0] = 0
     iter = Observable(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
-    obs = Dict{Symbol, Any}()
     axis_dict = Dict()
+    stats_dict = Dict()
     for (i, variable) in enumerate(keys(vars))
         plots = vars[variable]
         data[variable] = MovingWindow(window, Float32)
         axis_dict[(variable, :varname)] = fig[i, 1, Left()] = Label(fig, string(variable), textsize = 30)
         axis_dict[(variable, :varname)].padding = (0, 60, 0, 0)   
-        onlineplot!(fig, axis_dict, plots, iter, data, variable, i)
+        onlineplot!(fig, axis_dict, stats_dict, plots, iter, data, variable, i)
     end
     on(iter) do i
         if i > 1 # To deal with autolimits a certain number of samples are needed
@@ -97,7 +98,23 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     end
     MakieLayout.trim!(fig.layout)
     display(fig)
-    return TurkieCallback(fig, data, axis_dict, vars, params, iter)
+    return TurkieCallback(fig, data, axis_dict, vars, stats_dict, params, iter)
+end
+
+function Base.show(io::IO, cb::TurkieCallback)
+    show(io, cb.figure)
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", cb::TurkieCallback)
+    print(io, "TurkieCallback tracking the following variables:\n")
+    for v in keys(cb.vars)
+        print(io, "  ", v, "\t=> [")
+        for s in cb.vars[v][1:end-1]
+            print(io, name(s), ", ")
+        end
+        print(io, name(cb.vars[v][end]), "]\n")
+    end
 end
 
 function addIO!(cb::TurkieCallback, io)
@@ -123,8 +140,14 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration;
     end
 end
 
-function refresh_plots!(cb)
-    #TODO
+function refresh_plots!(cb::TurkieCallback)
+    cb.iter[] = 0
+    for v in keys(cb.data)
+        cb.data[v] = MovingWindow(cb.params[:window], Float32)
+        for stat in cb.vars[v]
+            reset!(cb.stats[(v, stat)], stat)
+        end
+    end
 end
 
 end
