@@ -1,7 +1,7 @@
 name = "Turkie"
 uuid = "8156cc02-0533-41cd-9345-13411ebe105f"
 authors = ["Theo Galy-Fajou <theo.galyfajou@gmail.com> and contributors"]
-version = "0.1.5"
+version = "0.1.6"
 
 [deps]
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
