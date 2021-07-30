@@ -15,13 +15,9 @@ export TurkieCallback
 export addIO!, record
 
 include("online_stats_plots.jl")
-
+include("utils.jl")
  # Uses the colorblind scheme of seaborn by default
 const std_colors = ColorSchemes.seaborn_colorblind
-
-name(s::Symbol) = name(Val(s))
-name(::Val{T}) where {T} = string(T)
-name(s::OnlineStat) = string(nameof(typeof(s)))
 
 """
     TurkieCallback(args...; kwargs....)
@@ -99,22 +95,6 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     MakieLayout.trim!(fig.layout)
     display(fig)
     return TurkieCallback(fig, data, axis_dict, vars, stats_dict, params, iter)
-end
-
-function Base.show(io::IO, cb::TurkieCallback)
-    show(io, cb.figure)
-end
-
-
-function Base.show(io::IO, ::MIME"text/plain", cb::TurkieCallback)
-    print(io, "TurkieCallback tracking the following variables:\n")
-    for v in keys(cb.vars)
-        print(io, "  ", v, "\t=> [")
-        for s in cb.vars[v][1:end-1]
-            print(io, name(s), ", ")
-        end
-        print(io, name(cb.vars[v][end]), "]\n")
-    end
 end
 
 function addIO!(cb::TurkieCallback, io)
