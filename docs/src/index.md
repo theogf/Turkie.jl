@@ -4,7 +4,7 @@
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
 [![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
 
-A [Julia](http://julialang.org) package for vizualizing dynamically sampling and statistics of Bayesian models
+A [Julia](http://julialang.org) package for visualizing dynamically sampling and statistics of Bayesian models
 ***
 
 ## Installation
