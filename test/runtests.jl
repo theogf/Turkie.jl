@@ -4,6 +4,7 @@ using CairoMakie
 CairoMakie.activate!()
 using OnlineStats
 using Turing
+using ColorSchemes
 
 @testset "Turkie.jl" begin
     Turing.@model function demo(x) # Some random Turing model
@@ -19,7 +20,7 @@ using Turing
     model = demo(xs)
     vars = [:m0, :s, :m]
     @testset "Interface" begin
-        @test Turkie.std_colors == Turkie.ColorSchemes.seaborn_colorblind
+        @test all(Turkie.std_colors .== ColorSchemes.seaborn_colorblind)
         @test Turkie.name(:blah) == "blah"
         @test Turkie.name(OnlineStats.Mean(Float32)) == "Mean"
 
