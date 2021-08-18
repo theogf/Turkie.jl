@@ -20,7 +20,7 @@ using ColorSchemes
     model = demo(xs)
     vars = [:m0, :s, :m]
     @testset "Interface" begin
-        @test Turkie.std_colors == Turkie.ColorSchemes.seaborn_colorblind
+        @test all(Turkie.std_colors .== ColorSchemes.seaborn_colorblind)
         @test Turkie.name(:blah) == "blah"
         @test Turkie.name(OnlineStats.Mean(Float32)) == "Mean"
 
