@@ -20,11 +20,12 @@ See the docs for some examples.
 """
 TurkieCallback
 
-struct TurkieCallback{TN<:NamedTuple,TD<:AbstractDict}
+struct TurkieCallback{TN<:NamedTuple,TS<:AbstractDict,TD<:AbstractDict}
     figure::Figure
     data::Dict{Symbol, MovingWindow}
     axis_dict::Dict
     vars::TN
+    stats::TS
     params::TD
     iter::Observable{Int}
 end
@@ -56,12 +57,13 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     iter = Observable(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
     axis_dict = Dict()
+    stats_dict = Dict()
     for (i, variable) in enumerate(keys(vars))
         plots = vars[variable]
         data[variable] = MovingWindow(window, Float32)
         axis_dict[(variable, :varname)] = fig[i, 1, Left()] = Label(fig, string(variable), textsize = 30)
         axis_dict[(variable, :varname)].padding = (0, 60, 0, 0)   
-        onlineplot!(fig, axis_dict, plots, iter, data, variable, i)
+        onlineplot!(fig, axis_dict, plots, stats_dict, iter, data, variable, i)
     end
     on(iter) do i
         if i > 1 # To deal with autolimits a certain number of samples are needed
@@ -74,7 +76,22 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     end
     MakieLayout.trim!(fig.layout)
     display(fig)
-    return TurkieCallback(fig, data, axis_dict, vars, params, iter)
+    return TurkieCallback(fig, data, axis_dict, vars, stats_dict, params, iter)
+end
+
+function Base.show(io::IO, cb::TurkieCallback)
+    show(io, cb.figure)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", cb::TurkieCallback)
+    print(io, "TurkieCallback tracking the following variables:\n")
+    for v in keys(cb.vars)
+        print(io, "  ", v, "\t=> [")
+        for s in cb.vars[v][1:end-1]
+            print(io, name(s), ", ")
+        end
+        print(io, name(cb.vars[v][end]), "]\n")
+    end
 end
 
 function addIO!(cb::TurkieCallback, io)
@@ -101,5 +118,11 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration;
 end
 
 function refresh_plots!(cb)
-    #TODO
+    cb.iter[] = 0
+    for v in keys(cb.data)
+        cb.data[v] = MovingWindow(cb.params[:window], Float32)
+        for stat in cb.vars[v]
+            reset!(cb.stats[(v, stat)], stat)
+        end
+    end
 end
