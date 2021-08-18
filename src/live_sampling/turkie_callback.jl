@@ -48,13 +48,13 @@ end
 function TurkieCallback(vars::NamedTuple, params::Dict)
 # Create a scene and a layout
     outer_padding = 5
-    fig = Figure(;resolution = (1200, 700), figure_padding=outer_padding)
+    resolution = get!(params, :resolution, (1200, 700))
+    fig = Figure(;resolution=resolution, figure_padding=outer_padding)
     window = get!(params, :window, 1000)
     refresh = get!(params, :refresh, false)
     params[:t0] = 0
     iter = Observable(0)
     data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
-    obs = Dict{Symbol, Any}()
     axis_dict = Dict()
     for (i, variable) in enumerate(keys(vars))
         plots = vars[variable]

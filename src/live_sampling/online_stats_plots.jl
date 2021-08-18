@@ -31,7 +31,7 @@ function onlineplot!(axis, stat::T, iter, data, iterations, i, j) where {T<:Onli
     on(stat) do s
         statvals[] = fit!(statvals[], Float32(value(s)))
     end
-    statpoints = map!(Observable(Point2f0.([0], [0])), statvals)  do v
+    statpoints = map!(Observable(Point2f0.([0], [0])), statvals) do v
         Point2f0.(value(iterations), value(v))
     end
     lines!(axis, statpoints, color = std_colors[i], linewidth = 3.0)

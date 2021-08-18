@@ -4,6 +4,7 @@ using CairoMakie
 CairoMakie.activate!()
 using OnlineStats
 using Turing
+using ColorSchemes
 
 @testset "Turkie.jl" begin
     Turing.@model function demo(x) # Some random Turing model
