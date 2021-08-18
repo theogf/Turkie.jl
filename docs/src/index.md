@@ -94,7 +94,7 @@ If you want a specific implementation of a certain stat please [open an issue](h
 If you want to make a cool animation you can use the built-in recording features of Makie.
 Here is the simple example, using the Turing example from above:
 ```julia
-record(cb.scene, joinpath(@__DIR__, "video.webm")) do io
+record(cb.figure, joinpath(@__DIR__, "video.webm")) do io
     addIO!(cb, io)
     sample(m,  NUTS(0.65), 300; callback = cb)
 end

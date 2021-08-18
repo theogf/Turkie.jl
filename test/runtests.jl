@@ -1,7 +1,6 @@
 using Turkie
 using Test
 using CairoMakie
-CairoMakie.activate!()
 using OnlineStats
 using Turing
 using ColorSchemes

@@ -1,4 +1,4 @@
-function onlineplot!(fig, axis_dict, stats::AbstractVector, stats_dict, iter, data, variable, i)
+function onlineplot!(fig::Figure, axis_dict::AbstractDict, stats::AbstractVector, stats_dict::AbstractDict, iter, data, variable, i)
     for (j, stat) in enumerate(stats)
         axis_dict[(variable, stat)] = fig[i, j] = Axis(fig, title="$(name(stat))")
         limits!(axis_dict[(variable, stat)], 0.0, 10.0, -1.0, 1.0)
@@ -10,7 +10,7 @@ end
 
 reset!(stats, stat) = nothing # Default behavior is to do nothing
 
-function onlineplot!(axis, stat::Symbol, stats, args...)
+function onlineplot!(axis::Axis, stat::Symbol, args...)
     onlineplot!(axis, Val(stat), args...)
 end
 
@@ -44,11 +44,11 @@ end
 
 function reset!(stats, stat::T) where {T<:OnlineStat}
     @eval TStat = $(nameof(T))
-    stats[1].value = TStat(Float32)
+    stats[1].val = TStat(Float32)
     stats[2][] = MovingWindow(stats[2][].b, Float32)
 end
 
-function onlineplot!(axis, ::Val{:trace}, iter, data, iterations, i, j)
+function onlineplot!(axis, ::Val{:trace}, stats, iter, data, iterations, i, j)
     trace = map!(Observable([Point2f0(0, 0)]), iter) do _
         Point2f0.(value(iterations), value(data))
     end
@@ -75,7 +75,7 @@ end
 
 function reset!(stats, stat::KHist)
     nbins = stat.k
-    stats[1].value = KHist(nbins, Float32)
+    stats[1].val = KHist(nbins, Float32)
     stats[2][] = Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins))
 end
 
@@ -105,13 +105,13 @@ function onlineplot!(axis, ::Val{:kde}, stats, iter, data, iterations, i, j)
 end
 
 function reset!(stats, ::Val{:kde})
-    stats[1].value = InterpKDE(kde([1f0]))
+    stats[1].val = InterpKDE(kde([1f0]))
     stats[2][] = range(0, 2, length=10)
 end
 
 name(s::Val{:histkde}) = "Hist. + KDE"
 
-function onlineplot!(axis, ::Val{:histkde}, iter, data, iterations, i, j)
+function onlineplot!(axis, ::Val{:histkde}, stats, iter, data, iterations, i, j)
     onlineplot!(axis, KHist(50), stats, iter, data, iterations, i, j)
     onlineplot!(axis, Val(:kde), stats, iter, data, iterations, i, j)
 end
@@ -138,6 +138,6 @@ end
 
 function reset!(stats, stat::AutoCov)
     b = stat.b
-    stats[1].value = AutoCov(b, Float32)
+    stats[1].val = AutoCov(b, Float32)
     stats[2][] = zeros(Float32, b + 1)
 end

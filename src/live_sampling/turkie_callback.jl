@@ -118,11 +118,11 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration;
 end
 
 function refresh_plots!(cb)
-    cb.iter[] = 0
     for v in keys(cb.data)
         cb.data[v] = MovingWindow(cb.params[:window], Float32)
         for stat in cb.vars[v]
             reset!(cb.stats[(v, stat)], stat)
         end
     end
+    # cb.iter.val = 0
 end

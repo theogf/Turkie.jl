@@ -1,10 +1,7 @@
-using Pkg; Pkg.activate("..")
 using Turing
 using Turkie
 using GLMakie # You could also use CairoMakie or another backend
-using CairoMakie
 GLMakie.activate!()
-CairoMakie.activate!()
 Turing.@model function demo(x) # Some random Turing model
     m0 ~ Normal(0, 2)
     s ~ InverseGamma(2, 3)
