@@ -1,7 +1,7 @@
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
 [![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
 [![Coverage Status](https://coveralls.io/repos/github/theogf/Turkie.jl/badge.svg?branch=master)](https://coveralls.io/github/theogf/Turkie.jl?branch=master)
-![BuildStatus](https://github.com/theogf/Turkie.jl/workflows/CI/badge.svg)
+[![CI](https://github.com/theogf/Turkie.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/theogf/Turkie.jl/actions/workflows/ci.yml)
 
 # Turing + Makie -> Turkie!
 
