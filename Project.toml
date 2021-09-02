@@ -1,7 +1,7 @@
 name = "Turkie"
 uuid = "8156cc02-0533-41cd-9345-13411ebe105f"
 authors = ["Theo Galy-Fajou <theo.galyfajou@gmail.com> and contributors"]
-version = "0.1.8"
+version = "0.1.9"
 
 [deps]
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
@@ -16,7 +16,7 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 ColorSchemes = "3.10"
 Colors = "0.12"
 KernelDensity = "0.5, 0.6"
-MCMCChains = "4"
+MCMCChains = "4, 5"
 Makie = "0.13, 0.14, 0.15"
 OnlineStats = "1.5"
 Turing = "0.15, 0.16, 0.17, 0.18"
