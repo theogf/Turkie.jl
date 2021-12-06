@@ -1,5 +1,5 @@
-using Turkie
 using Test
+using Turkie
 using CairoMakie
 using OnlineStats
 using Turing
@@ -26,7 +26,7 @@ using ColorSchemes
         cb = TurkieCallback(model; blah=2.0)
         @test cb.figure isa Figure
         @test sort(collect(keys(cb.data))) == sort(vcat(vars, :iter))
-        @test cb.data[:m] isa MovingWindow{Float32}
+        @test cb.data[:m] isa Observable{MovingWindow}
         @test sort(collect(keys(cb.vars))) == sort(vars)
         @test cb.vars[:m][1] == :histkde
         @test cb.vars[:m][2] == Mean(Float32)
@@ -56,15 +56,15 @@ using ColorSchemes
         @testset "Vector of symbols" begin
             for stat in [:histkde, :kde, :hist, :mean, :var, :trace, :autocov]
                 cb = TurkieCallback(Dict(:m => [stat]), refresh=true)
-                sample(model, MH(), 50; progress=false, callback=cb)
-                sample(model, MH(), 50; progress=false, callback=cb)
+                sample(model, MH(), 20; progress=false, callback=cb)
+                sample(model, MH(), 20; progress=false, callback=cb)
             end
         end
         @testset "Series" begin
             for stat in [Mean(Float32), Variance(Float32)]
                 cb = TurkieCallback(model, OnlineStats.Series(stat), refresh=true)
-                sample(model, MH(), 50; progress=false, callback=cb)
-                sample(model, MH(), 50; progress=false, callback=cb)
+                sample(model, MH(), 20; progress=false, callback=cb)
+                sample(model, MH(), 20; progress=false, callback=cb)
             end
         end
     end

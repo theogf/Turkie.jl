@@ -24,11 +24,11 @@ onlineplot!(axis, ::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32),
 
 # Generic fallback for OnlineStat objects
 function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {T<:OnlineStat}
-    window = data.b
+    window = data[].b
     @eval TStat = $(nameof(T))
     stat = Observable(TStat(Float32))
     on(iter) do _
-        stat[] = fit!(stat[], last(value(data)))
+        stat[] = fit!(stat[], last(value(data[])))
     end
     push!(stats, stat)
     statvals = Observable(MovingWindow(window, Float32))
@@ -37,20 +37,21 @@ function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {
     end
     push!(stats, statvals)
     statpoints = map!(Observable(Point2f0.([0], [0])), statvals) do v
-        Point2f0.(value(iterations), value(v))
+        @show v, iterations
+        Point2f0.(value(iterations[]), value(v))
     end
     lines!(axis, statpoints, color = std_colors[i], linewidth = 3.0)
 end
 
 function reset!(stats, stat::T) where {T<:OnlineStat}
     @eval TStat = $(nameof(T))
-    stats[1].val = TStat(Float32)
-    stats[2][] = MovingWindow(stats[2][].b, Float32)
+    stats[1].val = TStat(Float32) # Represent the actual stat
+    stats[2].val = MovingWindow(stats[2][].b, Float32) # Represent the moving window on the stat
 end
 
 function onlineplot!(axis, ::Val{:trace}, stats, iter, data, iterations, i, j)
     trace = map!(Observable([Point2f0(0, 0)]), iter) do _
-        Point2f0.(value(iterations), value(data))
+        Point2f0.(value(iterations[]), value(data[]))
     end
     lines!(axis, trace, color = std_colors[i]; linewidth = 3.0)
 end
@@ -59,7 +60,7 @@ function onlineplot!(axis, stat::KHist, stats, iter, data, iterations, i, j)
     nbins = stat.k
     stat = Observable(KHist(nbins, Float32))
     on(iter) do _
-        stat[] = fit!(stat[], last(value(data)))
+        stat[] = fit!(stat[], last(value(data[])))
     end
     hist_vals = Node(Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins)))
     push!(stats, stat)
@@ -70,13 +71,12 @@ function onlineplot!(axis, stat::KHist, stats, iter, data, iterations, i, j)
     end
     push!(stats, hist_vals)
     barplot!(axis, hist_vals; color=std_colors[i])
-    # barplot!(axis, rand(4), rand(4))
 end
 
 function reset!(stats, stat::KHist)
     nbins = stat.k
     stats[1].val = KHist(nbins, Float32)
-    stats[2][] = Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins))
+    stats[2].val = Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins))
 end
 
 function expand_extrema(xs)
@@ -90,12 +90,12 @@ end
 function onlineplot!(axis, ::Val{:kde}, stats, iter, data, iterations, i, j)
     interpkde = Observable(InterpKDE(kde([1f0])))
     on(iter) do _
-        interpkde[] = InterpKDE(kde(value(data)))
+        interpkde[] = InterpKDE(kde(value(data[])))
     end
     push!(stats, interpkde)
     xs = Observable(range(0, 2, length=10))
     on(iter) do _
-        xs[] = range(expand_extrema(extrema(value(data)))..., length = 200)
+        xs[] = range(expand_extrema(extrema(value(data[])))..., length = 200)
     end
     push!(stats, xs)
     kde_pdf = lift(xs) do xs
@@ -106,7 +106,7 @@ end
 
 function reset!(stats, ::Val{:kde})
     stats[1].val = InterpKDE(kde([1f0]))
-    stats[2][] = range(0, 2, length=10)
+    stats[2].val = range(0, 2, length=10)
 end
 
 name(s::Val{:histkde}) = "Hist. + KDE"
@@ -122,10 +122,10 @@ function reset!(stats, ::Val{:histkde})
 end
 
 function onlineplot!(axis, stat::AutoCov, stats, iter, data, iterations, i, j)
-    b = length(stat.cross)
+    b = length(stat.cross) - 1
     stat = Observable(AutoCov(b, Float32))
     on(iter) do _
-        stat[] = fit!(stat[], last(value(data)))
+        stat[] = fit!(stat[], last(value(data[])))
     end
     push!(stats, stat)
     statvals = map!(Observable(zeros(Float32, b + 1)), stat) do s
@@ -137,7 +137,7 @@ function onlineplot!(axis, stat::AutoCov, stats, iter, data, iterations, i, j)
 end
 
 function reset!(stats, stat::AutoCov)
-    b = stat.b
+    b = length(stat.cross) - 1
     stats[1].val = AutoCov(b, Float32)
-    stats[2][] = zeros(Float32, b + 1)
+    stats[2].val = zeros(Float32, b + 1)
 end

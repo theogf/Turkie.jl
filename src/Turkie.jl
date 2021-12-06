@@ -8,7 +8,7 @@ using Makie.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools
 using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
-using Turing: DynamicPPL.VarInfo, DynamicPPL.Model, Inference._params_to_array
+using Turing: DynamicPPL.VarInfo, DynamicPPL.Model, Inference, Inference._params_to_array
 
 using MCMCChains
 

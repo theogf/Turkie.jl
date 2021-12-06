@@ -13,8 +13,9 @@ end
 
 xs = randn(100) .+ 1;
 m = demo(xs);
-cb = TurkieCallback(m) # Create a callback function to be given to the sample function
-chain = sample(m, NUTS(0.65), 30; callback = cb)
+cb = TurkieCallback(m; refresh=false, resolution=(400, 400)) # Create a callback function to be given to the sample function
+chain = sample(m, NUTS(), 300; callback = cb);
+chain = sample(m, MH(), 30; callback = cb)
 
 
 record(cb.figure, joinpath(@__DIR__, "video.gif")) do io

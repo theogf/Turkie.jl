@@ -22,7 +22,7 @@ TurkieCallback
 
 struct TurkieCallback{TN<:NamedTuple,TS<:AbstractDict,TD<:AbstractDict}
     figure::Figure
-    data::Dict{Symbol, MovingWindow}
+    data::Dict{Symbol,Observable{MovingWindow}}
     axis_dict::Dict
     vars::TN
     stats::TS
@@ -55,12 +55,12 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     refresh = get!(params, :refresh, false)
     params[:t0] = 0
     iter = Observable(0)
-    data = Dict{Symbol, MovingWindow}(:iter => MovingWindow(window, Int))
+    data = Dict{Symbol, Observable{MovingWindow}}(:iter => Node(MovingWindow(window, Int)))
     axis_dict = Dict()
     stats_dict = Dict()
     for (i, variable) in enumerate(keys(vars))
         plots = vars[variable]
-        data[variable] = MovingWindow(window, Float32)
+        data[variable] = Node(MovingWindow(window, Float32))
         axis_dict[(variable, :varname)] = fig[i, 1, Left()] = Label(fig, string(variable), textsize = 30)
         axis_dict[(variable, :varname)].padding = (0, 60, 0, 0)   
         onlineplot!(fig, axis_dict, plots, stats_dict, iter, data, variable, i)
@@ -99,30 +99,31 @@ function addIO!(cb::TurkieCallback, io)
 end
 
 function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration; kwargs...)
-    if iteration == 1
+    if iteration == 1 && cb.iter[] != 0
         if cb.params[:refresh]
             refresh_plots!(cb)
         end
         cb.params[:t0] = cb.iter[] 
     end
-    fit!(cb.data[:iter], iteration + cb.params[:t0]) # Update the iteration value
-    for (variable, val) in zip(_params_to_array([transition])...)
+    fit!(cb.data[:iter][], iteration + cb.params[:t0]) # Update the iteration value
+    for (variable, val) in zip(Inference._params_to_array([transition])...)
         if haskey(cb.data, variable) # Check if symbol should be plotted
-            fit!(cb.data[variable], Float32(val)) # Update its value
+            fit!(cb.data[variable][], Float32(val)) # Update its value
         end
     end
-    cb.iter[] = cb.iter[] + 1
+    cb.iter[] = cb.iter[] + 1 # Triggers all the updates
     if haskey(cb.params, :io)
         recordframe!(cb.params[:io])
     end
 end
 
 function refresh_plots!(cb)
-    for v in keys(cb.data)
-        cb.data[v] = MovingWindow(cb.params[:window], Float32)
+    for v in keys(cb.vars)
+        cb.data[v].val = MovingWindow(cb.params[:window], Float32) # Reset the moving window
         for stat in cb.vars[v]
-            reset!(cb.stats[(v, stat)], stat)
+            reset!(cb.stats[(v, stat)], stat) # Reset the stats observables
         end
     end
-    # cb.iter.val = 0
+    cb.data[:iter].val = MovingWindow(cb.params[:window], Int)
+    cb.iter.val = 0
 end
