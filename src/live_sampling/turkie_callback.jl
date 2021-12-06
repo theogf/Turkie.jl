@@ -52,7 +52,7 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     resolution = get!(params, :resolution, (1200, 700))
     fig = Figure(;resolution=resolution, figure_padding=outer_padding)
     window = get!(params, :window, 1000)
-    refresh = get!(params, :refresh, false)
+    get!(params, :refresh, false)
     params[:t0] = 0
     iter = Observable(0)
     data = Dict{Symbol, Observable{MovingWindow}}(:iter => Node(MovingWindow(window, Int)))
