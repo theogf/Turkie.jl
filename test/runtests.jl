@@ -55,16 +55,18 @@ using ColorSchemes
     @testset "Trying same thing with refresh" begin
         @testset "Vector of symbols" begin
             for stat in [:histkde, :kde, :hist, :mean, :var, :trace, :autocov]
-                cb = TurkieCallback(Dict(:m => [stat]), refresh=true)
-                sample(model, MH(), 20; progress=false, callback=cb)
-                sample(model, MH(), 20; progress=false, callback=cb)
+                @testset "$stat" begin
+                    cb = TurkieCallback(Dict(:m => [stat]), refresh=true)
+                    sample(model, MH(), 20; progress=false, callback=cb);
+                    sample(model, MH(), 20; progress=false, callback=cb);
+                end
             end
         end
         @testset "Series" begin
             for stat in [Mean(Float32), Variance(Float32)]
                 cb = TurkieCallback(model, OnlineStats.Series(stat), refresh=true)
-                sample(model, MH(), 20; progress=false, callback=cb)
-                sample(model, MH(), 20; progress=false, callback=cb)
+                sample(model, MH(), 20; progress=false, callback=cb);
+                sample(model, MH(), 20; progress=false, callback=cb);
             end
         end
     end

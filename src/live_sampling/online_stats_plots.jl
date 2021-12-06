@@ -8,7 +8,12 @@ function onlineplot!(fig::Figure, axis_dict::AbstractDict, stats::AbstractVector
     end
 end
 
-reset!(stats, stat) = nothing # Default behavior is to do nothing
+reset!(::Any, ::Any) = nothing # Default behavior is to do nothing
+reset!(stats, stat::Symbol) = reset!(stats, Val(stat))
+reset!(stats, ::Val{:mean}) = reset!(stats, Mean())
+reset!(stats, ::Val{:var}) = reset!(stats, Variance())
+reset!(stats, ::Val{:autocov}) = reset!(stats, AutoCov(20))
+reset!(stats, ::Val{:hist}) = reset!(stats, KHist(50, Float32))
 
 function onlineplot!(axis::Axis, stat::Symbol, args...)
     onlineplot!(axis, Val(stat), args...)
@@ -37,7 +42,6 @@ function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {
     end
     push!(stats, statvals)
     statpoints = map!(Observable(Point2f0.([0], [0])), statvals) do v
-        @show v, iterations
         Point2f0.(value(iterations[]), value(v))
     end
     lines!(axis, statpoints, color = std_colors[i], linewidth = 3.0)
