@@ -1,4 +1,6 @@
 function onlineplot!(fig::Figure, axis_dict::AbstractDict, stats::AbstractVector, stats_dict::AbstractDict, iter, data, variable, i)
+    # Iter over all the stats for a given variable, create an axis and add 
+    # the appropriate plots on it.
     for (j, stat) in enumerate(stats)
         axis_dict[(variable, stat)] = fig[i, j] = Axis(fig, title="$(name(stat))")
         limits!(axis_dict[(variable, stat)], 0.0, 10.0, -1.0, 1.0)
@@ -8,6 +10,7 @@ function onlineplot!(fig::Figure, axis_dict::AbstractDict, stats::AbstractVector
     end
 end
 
+# Reset the saved stats to be able to refresh the plots when wanted
 reset!(::Any, ::Any) = nothing # Default behavior is to do nothing
 reset!(stats, stat::Symbol) = reset!(stats, Val(stat))
 reset!(stats, ::Val{:mean}) = reset!(stats, Mean())
@@ -31,16 +34,19 @@ onlineplot!(axis, ::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32),
 function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {T<:OnlineStat}
     window = data[].b
     @eval TStat = $(nameof(T))
+    # Create an observable based on the given stat
     stat = Observable(TStat(Float32))
     on(iter) do _
         stat[] = fit!(stat[], last(value(data[])))
     end
     push!(stats, stat)
+    # Create a moving window on this value
     statvals = Observable(MovingWindow(window, Float32))
     on(stat) do s
         statvals[] = fit!(statvals[], Float32(value(s)))
     end
     push!(stats, statvals)
+    # Pass this observable to create points to pass to Makie
     statpoints = map!(Observable(Point2f0.([0], [0])), statvals) do v
         Point2f0.(value(iterations[]), value(v))
     end
