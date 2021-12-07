@@ -1,6 +1,6 @@
 module Turkie
 
-using Makie: Makie, Figure, Scene, Point2f0
+using Makie: Makie, Figure, Axis, Point2f0
 using Makie: barplot!, lines!, scatter! # Plotting tools
 using Makie: Observable, Node, lift, on # Observable tools
 using Makie: recordframe! # Recording tools
@@ -8,7 +8,7 @@ using Makie.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools
 using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
-using Turing: DynamicPPL.VarInfo, DynamicPPL.Model, Inference._params_to_array
+using Turing: DynamicPPL.VarInfo, DynamicPPL.Model, Inference, Inference._params_to_array
 
 using MCMCChains
 

@@ -4,3 +4,9 @@ ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
+
+[compat]
+CairoMakie = "0.6"
+ColorSchemes = "3"
+OnlineStats = "1"
+Turing = "0.15, 0.16, 0.17, 0.18, 0.19"
