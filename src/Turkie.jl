@@ -2,7 +2,7 @@ module Turkie
 
 using Makie: Makie, Figure, Axis, Point2f0
 using Makie: barplot!, lines!, scatter! # Plotting tools
-using Makie: Observable, Node, lift, on # Observable tools
+using Makie: Observable, lift, on # Observable tools
 using Makie: recordframe! # Recording tools
 using Makie.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools

@@ -72,7 +72,7 @@ function onlineplot!(axis, stat::KHist, stats, iter, data, iterations, i, j)
     on(iter) do _
         stat[] = fit!(stat[], last(value(data[])))
     end
-    hist_vals = Node(Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins)))
+    hist_vals = Observable(Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins)))
     push!(stats, stat)
     on(stat) do h
         edges, weights = OnlineStats.xy(h)
