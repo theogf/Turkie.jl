@@ -6,7 +6,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
-CairoMakie = "0.6, 0.7"
+CairoMakie = "0.6, 0.7, 0.8"
 ColorSchemes = "3"
 OnlineStats = "1"
 Turing = "0.20, 0.21"
