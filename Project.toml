@@ -1,6 +1,6 @@
 name = "Turkie"
 uuid = "8156cc02-0533-41cd-9345-13411ebe105f"
-authors = ["Theo Galy-Fajou <theo.galyfajou@gmail.com> and contributors"]
+authors = ["Théo Galy-Fajou <theo.galyfajou@gmail.com> and contributors"]
 version = "0.1.12"
 
 [deps]
