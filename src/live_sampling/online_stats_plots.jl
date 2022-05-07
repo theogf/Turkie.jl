@@ -6,7 +6,7 @@ function onlineplot!(fig::Figure, axis_dict::AbstractDict, stats::AbstractVector
         limits!(axis_dict[(variable, stat)], 0.0, 10.0, -1.0, 1.0)
         stats_dict[(variable, stat)] = []
         onlineplot!(axis_dict[(variable, stat)], stat, stats_dict[(variable, stat)], iter, data[variable], data[:iter], i, j)
-        tight_ticklabel_spacing!(axis_dict[(variable, stat)])
+        # tight_ticklabel_spacing!(axis_dict[(variable, stat)])
     end
 end
 
@@ -47,8 +47,8 @@ function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {
     end
     push!(stats, statvals)
     # Pass this observable to create points to pass to Makie
-    statpoints = map!(Observable(Point2f0.([0], [0])), statvals) do v
-        Point2f0.(value(iterations[]), value(v))
+    statpoints = map!(Observable(Point2f.([0], [0])), statvals) do v
+        Point2f.(value(iterations[]), value(v))
     end
     lines!(axis, statpoints, color = std_colors[i], linewidth = 3.0)
 end
@@ -60,8 +60,8 @@ function reset!(stats, stat::T) where {T<:OnlineStat}
 end
 
 function onlineplot!(axis, ::Val{:trace}, stats, iter, data, iterations, i, j)
-    trace = map!(Observable([Point2f0(0, 0)]), iter) do _
-        Point2f0.(value(iterations[]), value(data[]))
+    trace = map!(Observable([Point2f(0, 0)]), iter) do _
+        Point2f.(value(iterations[]), value(data[]))
     end
     lines!(axis, trace, color = std_colors[i]; linewidth = 3.0)
 end
@@ -72,12 +72,12 @@ function onlineplot!(axis, stat::KHist, stats, iter, data, iterations, i, j)
     on(iter) do _
         stat[] = fit!(stat[], last(value(data[])))
     end
-    hist_vals = Observable(Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins)))
+    hist_vals = Observable(Point2f.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins)))
     push!(stats, stat)
     on(stat) do h
         edges, weights = OnlineStats.xy(h)
         weights = nobs(h) > 1 ? weights / OnlineStats.area(h) : weights
-        hist_vals[] = Point2f0.(edges, weights)
+        hist_vals[] = Point2f.(edges, weights)
     end
     push!(stats, hist_vals)
     barplot!(axis, hist_vals; color=std_colors[i])
@@ -86,7 +86,7 @@ end
 function reset!(stats, stat::KHist)
     nbins = stat.k
     stats[1].val = KHist(nbins, Float32)
-    stats[2].val = Point2f0.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins))
+    stats[2].val = Point2f.(collect(range(0f0, 1f0, length=nbins)), zeros(Float32, nbins))
 end
 
 function expand_extrema(xs)
@@ -142,7 +142,7 @@ function onlineplot!(axis, stat::AutoCov, stats, iter, data, iterations, i, j)
         value(s)
     end
     push!(stats, statvals)
-    scatter!(axis, Point2f0.([0.0, b], [-0.1, 1.0]), markersize = 0.0, color = RGBA(0.0, 0.0, 0.0, 0.0)) # Invisible points to keep limits fixed
+    scatter!(axis, Point2f.([0.0, b], [-0.1, 1.0]), markersize = 0.0, color = RGBA(0.0, 0.0, 0.0, 0.0)) # Invisible points to keep limits fixed
     lines!(axis, 0:b, statvals, color = std_colors[i], linewidth = 3.0)
 end
 
