@@ -5,7 +5,7 @@ include("online_stats_plots.jl")
     
 ## Arguments
 - Option 1 : 
-    `model::DynamicPPL.Model, plots::Series/AbstractVector=[:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]`
+    `model::DynamicPPL.Model, plots::OnlineStats.Series/AbstractVector=[:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]`
 
 For each of the variables of the given model each `plot` from `plots` will be plotted
 Multidimensional variable will be automatically have indices added to them
@@ -30,7 +30,7 @@ struct TurkieCallback{TN<:NamedTuple,TS<:AbstractDict,TD<:AbstractDict}
     iter::Observable{Int}
 end
 
-function TurkieCallback(model::Model, plots::Series; kwargs...)
+function TurkieCallback(model::Model, plots::OnlineStats.Series; kwargs...)
     return TurkieCallback(model, collect(plots.stats); kwargs...)
 end
 
@@ -74,7 +74,7 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
             end
         end
     end
-    MakieLayout.trim!(fig.layout)
+    Makie.trim!(fig.layout)
     display(fig)
     return TurkieCallback(fig, data, axis_dict, vars, stats_dict, params, iter)
 end

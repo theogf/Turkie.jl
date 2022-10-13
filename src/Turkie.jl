@@ -4,7 +4,6 @@ using Makie: Makie, Figure, Axis, Point2f
 using Makie: barplot!, lines!, scatter! # Plotting tools
 using Makie: Observable, lift, on # Observable tools
 using Makie: recordframe! # Recording tools
-using Makie.MakieLayout # Layouting tool
 using Colors, ColorSchemes # Colors tools
 using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
