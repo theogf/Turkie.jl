@@ -1,6 +1,6 @@
 module Turkie
 
-using Makie: Makie, Figure, Axis, Point2f
+using Makie: Makie, Figure, Axis, Point2f, Label
 using Makie: barplot!, lines!, scatter! # Plotting tools
 using Makie: Observable, lift, on # Observable tools
 using Makie: recordframe! # Recording tools
