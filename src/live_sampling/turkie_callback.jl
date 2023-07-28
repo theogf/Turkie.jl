@@ -30,7 +30,7 @@ struct TurkieCallback{TN<:NamedTuple,TS<:AbstractDict,TD<:AbstractDict}
     iter::Observable{Int}
 end
 
-function TurkieCallback(model::Model, plots::Series; kwargs...)
+function TurkieCallback(model::Model, plots::OnlineStats.Series; kwargs...)
     return TurkieCallback(model, collect(plots.stats); kwargs...)
 end
 
@@ -61,7 +61,7 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
     for (i, variable) in enumerate(keys(vars))
         plots = vars[variable]
         data[variable] = Observable(MovingWindow(window, Float32))
-        axis_dict[(variable, :varname)] = fig[i, 1, Left()] = Label(fig, string(variable), textsize = 30)
+        axis_dict[(variable, :varname)] = fig[i, 1, Left()] = Label(fig, string(variable), fontsize = 30)
         axis_dict[(variable, :varname)].padding = (0, 60, 0, 0)   
         onlineplot!(fig, axis_dict, plots, stats_dict, iter, data, variable, i)
     end
