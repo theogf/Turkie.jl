@@ -1,41 +1,47 @@
-[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.github.io/Turkie.jl/dev)
-[![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.github.io/Turkie.jl/stable)
+# Turing + Makie -> Turkie
+
+[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://theogf.dev/Turkie.jl/dev)
+[![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://theogf.dev/Turkie.jl/stable)
 [![Coverage Status](https://coveralls.io/repos/github/theogf/Turkie.jl/badge.svg?branch=master)](https://coveralls.io/github/theogf/Turkie.jl?branch=master)
 [![CI](https://github.com/theogf/Turkie.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/theogf/Turkie.jl/actions/workflows/ci.yml)
-
-# Turing + Makie -> Turkie!
 
 <p align="center">
   <img width="340" height="276" src="docs/src/assets/Turkie-logo.png">
 </p>
-
 
 <p align="center">
   <img src="docs/src/assets/Turkie-demo.gif">
 </p>
 WIP for an inference visualization package.
 
-### To plot during sampling :
+## Roadmap
+
+### To plot during sampling
+
 - [x] Trace of the chains
 - [x] Statistics (mean and var)
 - [x] Marginals (KDE/Histograms)
 - [x] Autocorrelation plots
 - [ ] Show multiple chains
 
-### Additional features :
+### Additional features
+
 - [x] Selecting which variables are plotted
 - [x] Selecting what plots to show
 - [x] Giving a recording option
 - [ ] Additional fine tuning features like
-    - [ ] Thinning
-    - [x] Creating a buffer to limit the viewing
+  - [ ] Thinning
+  - [x] Creating a buffer to limit the viewing
 
-### Extra Features 
+### Extra Features
+
 - [ ] Using a color mapping given some statistics
 - [ ] Allow to apply transformation before plotting
 
-## Usage:
+## Usage
+
 Small example:
+
 ```julia
 using Turing
 using Turkie
@@ -64,7 +70,8 @@ cb = TurkieCallback(
 
 ```
 
-You can also directly pass `OnlineStats` object : 
+You can also directly pass `OnlineStats` object:
+
 ```julia
 using OnlineStats
 cb = TurkieCallback(
