@@ -3,7 +3,7 @@ function onlineplot!(fig::Figure, axis_dict::AbstractDict, stats::AbstractVector
     # the appropriate plots on it.
     for (j, stat) in enumerate(stats)
         axis_dict[(variable, stat)] = fig[i, j] = Axis(fig, title="$(name(stat))")
-        limits!(axis_dict[(variable, stat)], 0.0, 10.0, -1.0, 1.0)
+        Makie.limits!(axis_dict[(variable, stat)], 0.0, 10.0, -1.0, 1.0)
         stats_dict[(variable, stat)] = []
         onlineplot!(axis_dict[(variable, stat)], stat, stats_dict[(variable, stat)], iter, data[variable], data[:iter], i, j)
         # tight_ticklabel_spacing!(axis_dict[(variable, stat)])
