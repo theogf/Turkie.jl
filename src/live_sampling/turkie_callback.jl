@@ -9,11 +9,13 @@ include("online_stats_plots.jl")
 
 For each of the variables of the given model each `plot` from `plots` will be plotted
 Multidimensional variable will be automatically have indices added to them
+
 - Option 2 :
     `vars::NamedTuple/Dict`
 Will plot each pair of symbol and series of plots.
 Note that for multidimensional variable you should pass a Symbol as `Symbol("m[1]")` for example.
 See the docs for some examples.
+
 ## Keyword arguments
 - `window=1000` : Use a window for plotting the trace
 - `refresh=false` : Restart the plots from scratch everytime `sample` is called again (still WIP)
@@ -35,7 +37,7 @@ function TurkieCallback(model::Model, plots::OnlineStats.Series; kwargs...)
 end
 
 function TurkieCallback(model::Model, plots::AbstractVector = [:histkde, Mean(Float32), Variance(Float32), AutoCov(20, Float32)]; kwargs...)
-    vars, vals = _params_to_array([VarInfo(model)])
+    vars = AbstractPPL.getsym.(keys(VarInfo(model)))
     return TurkieCallback(
         (;Pair.(vars, Ref(plots))...); # Return a named Tuple
         kwargs...
@@ -49,8 +51,8 @@ end
 function TurkieCallback(vars::NamedTuple, params::Dict)
 # Create a scene and a layout
     outer_padding = 5
-    resolution = get!(params, :resolution, (1200, 700))
-    fig = Figure(;resolution=resolution, figure_padding=outer_padding)
+    size= get!(params, :size, (1200, 700))
+    fig = Figure(;size, figure_padding=outer_padding)
     window = get!(params, :window, 1000)
     get!(params, :refresh, false)
     params[:t0] = 0
@@ -69,12 +71,12 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
         if i > 1 # To deal with autolimits a certain number of samples are needed
             for variable in keys(vars)
                 for p in vars[variable]
-                    autolimits!(axis_dict[(variable, p)])
+                    Makie.autolimits!(axis_dict[(variable, p)])
                 end
             end
         end
     end
-    MakieLayout.trim!(fig.layout)
+    # trim!(fig.layout)
     display(fig)
     return TurkieCallback(fig, data, axis_dict, vars, stats_dict, params, iter)
 end
@@ -106,7 +108,8 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration;
         cb.params[:t0] = cb.iter[] 
     end
     fit!(cb.data[:iter][], iteration + cb.params[:t0]) # Update the iteration value
-    for (variable, val) in zip(Inference._params_to_array([transition])...)
+    for (varname, val) in zip(Inference._params_to_array(model, [transition])...)
+        variable = AbstractPPL.getsym(varname)
         if haskey(cb.data, variable) # Check if symbol should be plotted
             fit!(cb.data[variable][], Float32(val)) # Update its value
         end
