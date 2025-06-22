@@ -15,7 +15,7 @@ jobs:
         version:
           - '1'
           - 'lts'
-          - 'nightly'
+          - 'pre'
         os:
           - ubuntu-latest
           - macOS-latest
