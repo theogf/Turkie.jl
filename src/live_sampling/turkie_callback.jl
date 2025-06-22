@@ -76,7 +76,7 @@ function TurkieCallback(vars::NamedTuple, params::Dict)
             end
         end
     end
-    # trim!(fig.layout)
+    Makie.trim!(fig.layout)
     display(fig)
     return TurkieCallback(fig, data, axis_dict, vars, stats_dict, params, iter)
 end
