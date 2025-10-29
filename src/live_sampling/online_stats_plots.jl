@@ -33,7 +33,7 @@ onlineplot!(axis, ::Val{:hist}, args...) = onlineplot!(axis, KHist(50, Float32),
 # Generic fallback for OnlineStat objects
 function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {T<:OnlineStat}
     window = data[].b
-    @eval TStat = $(nameof(T))
+    TStat = Base.typename(T).wrapper
     # Create an observable based on the given stat
     stat = Observable(TStat(Float32))
     on(iter) do _
@@ -54,7 +54,7 @@ function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {
 end
 
 function reset!(stats, stat::T) where {T<:OnlineStat}
-    @eval TStat = $(nameof(T))
+    TStat = Base.typename(T).wrapper
     stats[1].val = TStat(Float32) # Represent the actual stat
     stats[2].val = MovingWindow(stats[2][].b, Float32) # Represent the moving window on the stat
 end
