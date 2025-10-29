@@ -35,7 +35,7 @@ function onlineplot!(axis, stat::T, stats, iter, data, iterations, i, j) where {
     window = data[].b
     @eval TStat = $(nameof(T))
     # Create an observable based on the given stat
-    stat = Observable(TStat(Float32))
+    stat = Observable(Base.invokelatest(TStat, Float32))
     on(iter) do _
         stat[] = fit!(stat[], last(value(data[])))
     end
@@ -55,7 +55,7 @@ end
 
 function reset!(stats, stat::T) where {T<:OnlineStat}
     @eval TStat = $(nameof(T))
-    stats[1].val = TStat(Float32) # Represent the actual stat
+    stats[1].val = Base.invokelatest(TStat, Float32) # Represent the actual stat
     stats[2].val = MovingWindow(stats[2][].b, Float32) # Represent the moving window on the stat
 end
 
