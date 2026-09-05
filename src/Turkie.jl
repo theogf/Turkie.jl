@@ -9,7 +9,6 @@ using KernelDensity # To be able to give a KDE
 using OnlineStats # Estimators
 using Turing.DynamicPPL: AbstractPPL, VarInfo, Model
 using Turing: DynamicPPL
-using Turing: Inference 
 
 using MCMCChains
 

@@ -108,9 +108,11 @@ function (cb::TurkieCallback)(rng, model, sampler, transition, state, iteration;
         cb.params[:t0] = cb.iter[] 
     end
     fit!(cb.data[:iter][], iteration + cb.params[:t0]) # Update the iteration value
-    for (varname, val) in zip(Inference._params_to_array(model, [transition])...)
-        variable = AbstractPPL.getsym(varname)
-        if haskey(cb.data, variable) # Check if symbol should be plotted
+    for (vn, value) in pairs(transition.params)
+        variable = AbstractPPL.getsym(vn)
+        haskey(cb.data, variable) || continue # Check if symbol should be plotted
+        # Multidimensional variables are split into their scalar leaves, e.g. `m[1]`, `m[2]`
+        for (_, val) in AbstractPPL.varname_and_value_leaves(vn, value)
             fit!(cb.data[variable][], Float32(val)) # Update its value
         end
     end
